@@ -1,0 +1,60 @@
+# 끊기 (Kkeugi)
+
+> 한국 1인 워커(개발자·디자이너·작가·연구자·프리·1인 사업자)를 위한 디지털 디톡스 Android 앱 (Flutter).
+> SNS·쇼츠·게임 끊기 타이머 + UsageStatsManager 자동 import + AI 주간 "회복된 집중 시간 → 매출 환산" 리포트 + 카톡 채널 알림.
+
+**PRD**: [`docs/PRD.md`](docs/PRD.md) (원본: `find_business/docs/candidates/b2c_mobile_app/deepdive/2026-05-18-kkeugi-habit-stop-timer.md`)
+
+## 한눈에
+
+| | |
+|---|---|
+| **점수** | 82.5 / verdict pass / **GO** |
+| **자본** | 약 ₩50만 (capital_krw_10k 100의 50%) |
+| **MVP** | 8주 (W1 Flutter 학습 포함) |
+| **수익** | 일회 ₩9,900 + 구독 ₩4,900/월 hybrid |
+| **Phase 1 채널** | X 한국 인디 메이커 + 긱뉴스 + okky + 노션 한국 커뮤니티 + 인플루언서 1명 시드 |
+| **iOS** | v2 격하 — Phase 1 매출 ₩200만/월 도달 후 |
+
+## 기술 스택
+
+- **앱**: Flutter 3.x (Dart) + Material 3 — Android 단일 시드
+- **OS 데이터**: Flutter platform channel → Kotlin → `UsageStatsManager` (PACKAGE_USAGE_STATS)
+- **백엔드**: Firebase (Firestore + Auth + Cloud Functions + FCM)
+- **LLM**: Claude Haiku 3.5 (primary) + GPT-5 mini (fallback)
+- **결제**: Toss Payments 앱 SDK (외부 결제, 인앱결제 우회) — 일회 + 구독 빌링키
+- **카톡**: 카카오 비즈메시지 알림톡 정보성 — Aligo / SOLAPI / DirectSend
+
+## 8주 빌드 + gstack 매핑
+
+| 주차 | 빌드 | gstack |
+|---|---|---|
+| W0 | 레포 init (이 단계) + Flutter SDK 설치 + Android Studio + Firebase project | `/setup-gbrain` · `/setup-deploy` · **`/office-hours`** (PRD 디테일 발산) |
+| W1 | Flutter 학습 + Figma wireframe 5화면 + Firestore 스키마 | **`/design-consultation`** → DESIGN.md · **`/plan-design-review`** · **`/plan-eng-review`** |
+| W2 | Firebase 연동 + 카카오 OAuth + 온보딩 + 시간당 가치 입력 | `/investigate` · `/review` |
+| W3 | 타이머 화면 + 행동 3종 + FCM schedule | `/investigate` |
+| W4 | Platform channel → Kotlin → UsageStatsManager + 동의 UX | **`/codex` consult** · **`/cso`** (권한 보안) |
+| W5 | Toss Payments + 환불 정책 | **`/cso`** (결제 위협 모델) · `/review` |
+| W6 | AI 주간 리포트 (Cloud Functions + Claude Haiku) + 카드 렌더링 + 1-tap 공유 | **`/codex`** (프롬프트 검증) · `/review` |
+| W7 | 카카오 채널 + 알림톡 + cron + 클로즈드 베타 50명 | **`/qa`** · **`/design-review`** + 법무 자문 ₩30~50만 |
+| W8 | Play Store 출시 ($25) + 결제 funnel + KPI dashboard | **`/ship`** · **`/land-and-deploy`** · **`/canary`** |
+| W9+ | 운영·반복 | `/retro` 주간 · `/document-release` · `/devex-review` (랜딩·결제 funnel) |
+
+## 다음 단계 (현재 W0)
+
+1. Flutter SDK 설치 — `brew install --cask flutter` 또는 [공식 가이드](https://docs.flutter.dev/get-started/install/macos)
+2. Android Studio 설치 + Flutter plugin
+3. `flutter doctor` 통과 확인
+4. `flutter create kkeugi --org kr.kkeugi --platforms=android` (이 디렉토리 안에서)
+5. Firebase project 생성 + `flutterfire configure`
+6. `/office-hours` 호출 → PRD에 빠진 UX·매출 환산 계산식 디테일 발산
+7. `/design-consultation` 호출 → DESIGN.md 생성
+8. `/plan-eng-review` 호출 → 아키텍처 확정
+
+## 핵심 결정 사항 (변경 시 PRD에 기록)
+
+- **Flutter 채택 (Android 단일 시드)**: 2026-05-21. iOS v2 격하. persona.md 갱신 (RN+Expo 제거, Flutter "중" 본격 전환).
+- **UsageStatsManager 직접 접근**: PWA 단독 불가, Flutter platform channel → Kotlin native.
+- **Toss 외부 결제**: Google Play Billing 30% 우회 (한국 인앱결제법 2022 시행). 가격 ₩9,900 / ₩4,900 유지.
+- **카톡 알림톡 정보성만**: 2026.1.1 정책 준수. 마일리지·쿠폰·할인 메시지 0. 친구톡 2025.12.31 종료 — 사용 X.
+- **본인이 ICP**: 1인 워커. 콘텐츠·UX 추측 0.
