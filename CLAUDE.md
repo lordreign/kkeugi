@@ -2,21 +2,23 @@
 
 > Claude Code / gstack 의 모든 에이전트가 이 파일을 읽고 컨텍스트를 잡는다.
 
-## 한 줄 정의
+## 한 줄 정의 (2026-05-24 V1 인앱결제 paid product)
 
-한국 1인 워커를 위한 디지털 디톡스 Android 앱 (Flutter). SNS·쇼츠·게임 끊기 타이머 + UsageStatsManager 자동 import + AI 주간 "회복된 집중 시간 → 매출 환산" 리포트 + 카톡 채널 알림.
+한국 1인 워커를 위한 디지털 디톡스 Android 앱 (Flutter). SNS·쇼츠·게임·웹툰 끊기 타이머 + UsageStatsManager 자동 import + AI 주간 "시간 빚 환산" 리포트 + **multi-channel retention** (FCM + 이메일 + Telegram). **V1 = Google Play Billing 인앱결제** (Hybrid 일회 ₩11K + 월 ₩5.9K + 연 ₩39K + 7일 free trial, 사업자 X 가능). **사업자 등록 trigger = 월 net 매출 ₩35-50만 도달**. **V2 (사업자 등록 후) = Toss + 카톡 추가**.
 
 ## 핵심 정보
 
 | | |
 |---|---|
 | **ICP** | 한국 1인 워커 (개발자·디자이너·작가·연구자·프리·1인 사업자) — 본인이 곧 ICP |
-| **wedge 3개** | (1) 매출 환산 AI 리포트, (2) UsageStatsManager 자동 import, (3) 카톡 알림톡 retention |
-| **플랫폼** | Android 네이티브 (Flutter) 단일 시드. iOS는 Phase 1 매출 ₩200만/월 후 v2 |
-| **수익** | 일회 ₩9,900 인증서 + 구독 ₩4,900/월 hybrid (Toss 외부 결제) |
-| **자본** | 약 ₩50만 (Google Play $25 + 법무 ₩30~50만 + 인플 시드 ₩30~50만 + 예비) |
-| **MVP** | 8주 (W1 Flutter 학습 포함) |
-| **GO/NO-GO** | **GO** (2026-05-21 확정) |
+| **wedge 3개 (V1)** | (1) 시간 빚 환산 AI 리포트, (2) UsageStatsManager 자동 import, (3) **multi-channel retention** (FCM + 이메일 + Telegram, 사용자 선택) |
+| **플랫폼** | Android 네이티브 (Flutter) 단일 시드. iOS는 V2 |
+| **V1 수익** | **Google Play 인앱결제** (사업자 X): 일회 ₩11K + 월 ₩5.9K + 연 ₩39K + 7일 free trial + 베타 50% + 출시 7일 30% |
+| **사업자 trigger** | 월 net 매출 ₩35-50만 고정 도달 시 사업자 등록 결정 |
+| **V2 수익 (사업자 후)** | Toss 외부결제 (수수료 30%→3.3%) + 카톡 알림톡 추가 |
+| **V1 자본** | 약 ₩10만 (Google Play Console $25 + .kr 도메인 + 예비) |
+| **MVP** | 8주 full-time 또는 12-16주 part-time (본업 유지) |
+| **GO/NO-GO** | **GO** (2026-05-24 V1 인앱결제 paid re-pivot 확정) |
 
 ## 빌드 단계 (W0 = 지금)
 
@@ -28,15 +30,43 @@
 - **W7**: 베타 50명 + `/qa` + `/design-review`
 - **W8**: Play Store 출시 + `/ship` + `/land-and-deploy` + `/canary`
 
-## 기술 스택 (확정)
+## 기술 스택 (확정 — 2026-05-23 백엔드 pivot)
 
+### Frontend
 - **앱**: Flutter 3.x (Dart) + Material 3 + Riverpod (state)
+- **로컬 캐시**: Drift (SQLite) — offline-first
 - **OS API**: Flutter platform channel → Kotlin → `UsageStatsManager` (PACKAGE_USAGE_STATS)
-- **BaaS**: Firebase (Firestore + Auth + Cloud Functions + FCM)
-- **LLM**: Claude Haiku 3.5 primary, GPT-5 mini fallback
-- **결제**: Toss Payments 앱 SDK (외부 결제)
-- **카톡**: 카카오 비즈메시지 알림톡 정보성 (Aligo / SOLAPI / DirectSend 중 1택)
-- **분석**: Firebase Analytics + Mixpanel free
+- **푸시 수신**: firebase_messaging (FCM 토큰만)
+- **Auth 클라이언트 (V1)**: google_sign_in pub package (Google Sign-In primary)
+- **Auth 클라이언트 (V2)**: kakao_flutter_sdk_user (Kakao 카톡 연동 link)
+
+### Backend
+- **API 서버**: **FastAPI (Python)** on Fly.io seoul region (~$10-15/월)
+- **DB**: **PostgreSQL on Supabase** (Free tier 5,000명까지, 이후 Pro $25 또는 Hetzner self-managed migration)
+- **Auth (V1)**: **JWT + Google Sign-In** (google-auth library ID token verify, Firebase Auth 미사용)
+- **Auth (V2)**: Kakao OAuth link (카톡 연동 시점, phone 입력 step)
+- **Cron**: APScheduler (FastAPI 내장) — 일요일 22:00 reflection + threshold trigger
+- **Migrations**: Alembic
+- **Sync 패턴**: REST endpoints, last-write-wins for settings, append-only for usage_events
+
+### 외부 서비스 (V1)
+- **LLM**: Claude Haiku 3.5 primary (Anthropic SDK from FastAPI), GPT-5 mini fallback
+- **푸시 발송**: Firebase project FCM only (Firebase Admin SDK from Python) — Firestore·Auth 미사용
+- **이메일**: Mailgun free tier (5K/월) — transactional email
+- **Telegram**: Bot API (python-telegram-bot SDK) — 무료, 사업자 X
+- **분석**: Mixpanel free
+- **모니터링**: Sentry free tier (Python + Flutter)
+
+### 외부 서비스 (V2, 사업자 등록 후 도입)
+- **결제**: Toss Payments 앱 SDK (외부 결제) — V2
+- **카톡**: 카카오 비즈메시지 알림톡 정보성 (Aligo / SOLAPI / DirectSend) — V2
+
+### Phase 1 → Phase 2 사업 확장 호환성
+- **데이터 ownership**: Postgres pg_dump 자유, 어디든 migration 가능
+- **Schema 자유**: B-2 ICP 확장 (user_segment 컬럼), B-3 행동 확장 (caffeine_events, sleep_events 새 테이블)
+- **데이터 분석**: raw SQL + pandas + scikit-learn 자유
+- **매각 due diligence**: Postgres dump = 표준 자산, vendor 의존 0
+- **한국 데이터 주권**: Fly.io seoul region — 본인 ICP "기기 안에만" 메시지와 일관
 
 ## 핵심 원칙
 
@@ -77,8 +107,26 @@ When in doubt, invoke the skill.
 - **사업 발굴 하네스**: `/Users/jungsunpark/Projects/pjs/find_business/`
 - **persona**: `/Users/jungsunpark/Projects/pjs/find_business/config/persona.md` (Flutter "중" 본격 전환 2026-05-21)
 
+## Design System
+
+`DESIGN.md`를 항상 모든 UI·시각 결정 전에 읽는다. 모든 폰트·색·spacing·미학 방향이 거기 정의되어 있다.
+사용자 명시 허가 없이 deviate 금지. QA 모드에서 DESIGN.md와 불일치하는 코드 발견 시 flag.
+Memorable thing: **거울 같은 친구 — 압박 X · 비난 X · 객관 O · 지속 동기.** 새 컴포넌트·카피·색 추가 시 이 4축으로 self-check.
+
 ## 변경 이력
 
 | 날짜 | 변경 | 사유 |
 |---|---|---|
 | 2026-05-21 | 레포 init. PRD 복사. CLAUDE.md + README.md 작성. Flutter SDK·Android Studio 설치 대기 (W0) | find_business deepdive GO 판정 + gstack 활용 결정. 다음: Flutter 설치 → `/office-hours` |
+| 2026-05-22 | `/office-hours` 완료 → design doc APPROVED (`~/.gstack/projects/kkeugi/jungsunpark-main-design-20260522-001310.md`). Approach B "Focus Accountant Reframing" 채택. P1-P7 premise 확정. | 본인 ICP episode 발산 + premise 6개 + Google Play policy P7. PRD 9항목 변경 후보. |
+| 2026-05-22 | `/design-consultation` 완료 → `DESIGN.md` 작성. Pretendard + IBM Plex Mono + clay `#8B5A3C` accent + light default 확정. | Memorable thing "거울 같은 친구" 발견. P2 시점별 톤 분리 design tokens 반영. |
+| 2026-05-23 | `/plan-eng-review` 진행 중 → PRD §4·§8·§11·§12·§14 update. 카톡 알림 reframed (무료 주1회 reflection / 유료 주1회+threshold+시간custom). W4에 카톡 채널 등록·심사·privacy policy URL 공개·UsageStatsManager 통합. W7 법무 budget ₩50~70만 (P7). | 사용자 challenge "gandan은 단식 active session, 끊기는 회고 — cadence 다름". memorable thing "압박 X" 일치. 비용 ₩37만 → ₩6.7만/월 (1,000명). |
+| 2026-05-23 | **백엔드 stack pivot**: Firebase → FastAPI + Postgres on Supabase Free + Fly.io seoul. PRD §7 전면 rewrite, §8 운영비 재산정, §12 W2·W3·W6 update. Assumption Audit #6 신규. CLAUDE.md 기술 스택 섹션 전면 재구성. | 사용자 결정: (1) FastAPI 본인 주력 stack, Firebase 학습 비용 회피, (2) 사업 확장 (Phase 2·매각·multi-product) 시 Postgres ownership·schema 자유·analytics 필수. Firebase는 FCM only로 축소. |
+| 2026-05-24 | **Cash 비용 재산정 + active filter 채택**. 1,000명 ₩7.4만 / 5,000명 ₩28만 / 20,000명 ₩117만 (gross margin 81-86%). 카톡 active filter: 지난 7일 usage_events ≥1건 + 카톡 친구 추가 사용자만 발송. PRD §8 카톡 ₩6.7만 → ₩3.4만 (-50%). §12 W6 active filter SQL 구현 추가. | 사용자 challenge "비활성 사용자에게 카톡 무의미". 정보성 정책 준수 강화 + 비용 driver 완화. |
+| 2026-05-24 | **🔄 V1 = 인앱결제 paid product re-pivot**. 무료 도구 pivot reverse. Google Play Billing Individual = 사업자 X로 매출 발생. 가격 ₩11K/₩5.9K/₩39K Hybrid + 7일 free trial + 베타 50% + 출시 7일 30%. 사업자 trigger = 월 net 매출 ₩35-50만. autoplan CEO subagent challenge 반영 — 발각 risk·maintenance trap·ICP paradox·exit criteria PRD §11·§13 정량화. PRD §1·§4·§5·§7·§11·§12·§13·§14 + ARCHITECTURE subscriptions 부활 + DESIGN paywall + TODOS + CLAUDE + README update. | autoplan CEO review subagent challenge. 사업자 X 매출 가능 path 발견 (Google Play Individual). 위험 정량화 후 사용자 결정. |
+| 2026-05-24 | **Auth Google Sign-In primary 변경** (Kakao OAuth → V2 격하). 사용자 catch "카카오 OAuth를 사용해야하는 이유는?". google_sign_in pub package + google-auth library backend verify. Kakao Developers 비즈 심사 W2에서 제거. V2 카톡 연동 시점에 /v1/auth/kakao_link (phone 입력 step). PRD §7 §12 + ARCHITECTURE §5 + DESIGN 온보딩 + users.google_sub 추가. | Android 표준 + Google Play Billing 자연 통합 + W2 일정 단축 + 본명 강결합 발각 risk 회피. V2 카톡 link 시 phone 5초 friction. |
+| 2026-05-24 | **PRD §8 3-시나리오 매트릭스 재구성** (보수 4% / 기본 7% / 공격 12% paid). 이전 "20% paid" 비현실적 가정 정정. 9-셀 매트릭스 (scenario × scale). Gross margin 90-96% 달성. | 사용자 challenge "유료 비율 현실은?". §9 매출 시뮬레이션과 framing 일관. |
+| 2026-05-24 | **PRD §6 GTM Phase별 Acquisition 전략 통합**. 0a/0b/1/2 4단계 매트릭스. 단계별 채널 × yield × CAC + LTV/CAC 21.5x→5.7x. Shorts/Reels는 V1.5+ 홀딩 (TODOS 등록, 시리즈 5종 후보 명시). | 사용자 catch "PRD §9 수치만 있고 어떻게 달성하는지 미명시". §6 단계별 전략 부재 보완. |
+| 2026-05-24 | **PRD §9 매출 detail 3종 추가**: Sensitivity (acquisition #1 민감), Cash flow + Capital ROI 48.3x BEP M3, Best/Worst case + NO-GO trigger (M3 hard checkpoint). Detail 1-4 (Cohort/MRR/ARPU/Churn)는 M3+ 데이터 모인 후 추가 (TODOS 등록). | 본인 자본 ₩50만 회수 시점·NO-GO timing 정밀화. |
+| 2026-05-24 | **`/plan-eng-review` Architecture 완료** → `docs/ARCHITECTURE.md` 작성. usage_events monthly partition / Sync 8h + 로컬 threshold / JWT 15min + 30d rotation 결정 잠금. Subagent cold read 14개 issue 반영 (idempotency 재설계, FK CASCADE 제거, PIPA, 카톡 광고성 회피, Toss-Play Plan B, W2-W3 split, APScheduler 외부 trigger fallback, Anthropic Tier 1, Supabase Pro trigger, Sentry 등). **P0 critical: 사업자 등록 + 카카오 비즈니스 채널 + 알림톡 심사 W2 전 즉시 착수**. | Solo founder + 8주 + 카톡 wedge #3 검증 가능성 살리기 위해 사업자 등록 timeline 압축. ARCHITECTURE.md = 모든 후속 빌드 single source of truth. |
+| 2026-05-24 | **🔄 V1 = 무료 도구 pivot (CRITICAL)**: 본인 회사 겸업 명시적 금지 확인 → 사업자등록증 V1에서 X → 카톡·Toss V2 격하. wedge #3 재정의: **multi-channel retention** (FCM + 이메일 + Telegram, 사용자 선택). PRD §1·§4·§5·§7·§8·§10·§11·§12·§13·§14 + ARCHITECTURE §14a + DESIGN 시점별 톤 + TODOS + CLAUDE.md 전면 update. V1 자본 ₩50만 → ₩10만. V2 진입 = M3 hard checkpoint 시점 사업자 path 결정. | 회사 겸업 제약 + V1 출시 + portfolio 가치 + V2 monetization base. multi-channel 다양성 = 새 wedge로 전환 (카톡 약화 → 1인 워커 친화 메신저 선택). |

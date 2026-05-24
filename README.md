@@ -1,7 +1,9 @@
 # 끊기 (Kkeugi)
 
 > 한국 1인 워커(개발자·디자이너·작가·연구자·프리·1인 사업자)를 위한 디지털 디톡스 Android 앱 (Flutter).
-> SNS·쇼츠·게임 끊기 타이머 + UsageStatsManager 자동 import + AI 주간 "회복된 집중 시간 → 매출 환산" 리포트 + 카톡 채널 알림.
+> SNS·쇼츠·게임·웹툰 끊기 타이머 + UsageStatsManager 자동 import + AI 주간 "시간 빚 환산" 리포트 + **multi-channel retention** (FCM + 이메일 + Telegram).
+> **V1 = Google Play 인앱결제** (사업자 X 가능): Hybrid 일회 ₩11K + 월 ₩5.9K + 연 ₩39K + 7일 free trial + 베타 50% + 출시 7일 30%.
+> 사업자 등록 trigger = **월 net 매출 ₩35-50만 도달**. V2 (사업자 후) = Toss·카톡 추가.
 
 **PRD**: [`docs/PRD.md`](docs/PRD.md) (원본: `find_business/docs/candidates/b2c_mobile_app/deepdive/2026-05-18-kkeugi-habit-stop-timer.md`)
 
@@ -9,21 +11,25 @@
 
 | | |
 |---|---|
-| **점수** | 82.5 / verdict pass / **GO** |
-| **자본** | 약 ₩50만 (capital_krw_10k 100의 50%) |
-| **MVP** | 8주 (W1 Flutter 학습 포함) |
-| **수익** | 일회 ₩9,900 + 구독 ₩4,900/월 hybrid |
-| **Phase 1 채널** | X 한국 인디 메이커 + 긱뉴스 + okky + 노션 한국 커뮤니티 + 인플루언서 1명 시드 |
-| **iOS** | v2 격하 — Phase 1 매출 ₩200만/월 도달 후 |
+| **점수** | 82.5 / verdict pass / **GO (V1 무료 도구)** |
+| **V1 자본** | 약 ₩10만 (Google Play $25 + .kr 도메인 + 예비) |
+| **V1 MVP** | 8주 full-time 또는 12-16주 part-time (본업 유지) |
+| **V1 수익** | Google Play 인앱결제: 일회 ₩11K + 월 ₩5.9K + 연 ₩39K + 7일 free trial |
+| **사업자 trigger** | 월 net 매출 ₩35-50만 도달 시 |
+| **V2 수익 (사업자 후)** | Toss 외부결제 (수수료 30%→3.3%) + 카톡 알림톡 |
+| **Phase 1 채널** | X 한국 인디 메이커 + 긱뉴스 + okky + 노션 한국 커뮤니티 (V1 무료라 viral easier) |
+| **iOS** | V2 격하 |
 
 ## 기술 스택
 
-- **앱**: Flutter 3.x (Dart) + Material 3 — Android 단일 시드
+- **앱**: Flutter 3.x (Dart) + Material 3 + Riverpod + Drift (SQLite offline) — Android 단일 시드
 - **OS 데이터**: Flutter platform channel → Kotlin → `UsageStatsManager` (PACKAGE_USAGE_STATS)
-- **백엔드**: Firebase (Firestore + Auth + Cloud Functions + FCM)
-- **LLM**: Claude Haiku 3.5 (primary) + GPT-5 mini (fallback)
+- **백엔드**: **FastAPI (Python) on Fly.io seoul** + **PostgreSQL on Supabase Free** + JWT + Kakao OAuth + APScheduler cron (2026-05-23 pivot from Firebase)
+- **푸시**: Firebase project FCM only (Firestore·Auth 미사용)
+- **LLM**: Claude Haiku 3.5 (primary) + GPT-5 mini (fallback) — Anthropic SDK from FastAPI
 - **결제**: Toss Payments 앱 SDK (외부 결제, 인앱결제 우회) — 일회 + 구독 빌링키
-- **카톡**: 카카오 비즈메시지 알림톡 정보성 — Aligo / SOLAPI / DirectSend
+- **카톡**: 카카오 비즈메시지 알림톡 정보성 — Aligo / SOLAPI / DirectSend (FastAPI 직접 호출)
+- **모니터링**: Sentry free tier + Mixpanel free
 
 ## 8주 빌드 + gstack 매핑
 
