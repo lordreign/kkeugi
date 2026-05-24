@@ -58,10 +58,22 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
+      - name: Check deploy config
+        id: cfg
+        run: |
+          if [ -n "$FLY_API_TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::FLY_API_TOKEN 미설정 — 배포 skip. P0 checklist의 Fly.io setup 완료 후 secret 등록 시 자동 활성."
+          fi
       - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ready == 'true'
       - uses: superfly/flyctl-actions/setup-flyctl@master
+        if: steps.cfg.outputs.ready == 'true'
       - name: Deploy to Fly.io
+        if: steps.cfg.outputs.ready == 'true'
         run: flyctl deploy --remote-only --config backend/fly.toml --dockerfile backend/Dockerfile
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
