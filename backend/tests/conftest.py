@@ -4,6 +4,7 @@ from collections.abc import AsyncGenerator
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 os.environ.setdefault("ENVIRONMENT", "test")
@@ -24,7 +25,12 @@ from app.users import models as users_models  # noqa: F401, E402
 async def db_engine():
     engine = create_async_engine(os.environ["DATABASE_URL"], poolclass=None)
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        # DROP SCHEMA CASCADE — alembic이 만든 테이블 (FK 참조 포함)까지
+        # 모두 제거. Base.metadata.drop_all은 ORM 모델 (users·refresh_tokens)만
+        # 알아서 FK 의존성으로 실패함. CI는 alembic upgrade를 test DB에 먼저
+        # 돌리므로 9개 테이블이 존재 → CASCADE 리셋 필수.
+        await conn.execute(text("DROP SCHEMA public CASCADE"))
+        await conn.execute(text("CREATE SCHEMA public"))
         await conn.run_sync(Base.metadata.create_all)
     yield engine
     await engine.dispose()

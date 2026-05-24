@@ -39,9 +39,12 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B"]
+# B008: FastAPI는 Depends()/Query() 등을 함수 기본값에서 호출하는 게 표준 패턴.
+# extend-immutable-calls는 import name resolution 의존이라 IDE ruff 환경별로
+# 안 먹을 수 있어 B008 자체를 ignore (CLI·IDE 모두 일관 동작).
+ignore = ["B008"]
 
 [tool.ruff.lint.flake8-bugbear]
-# FastAPI dependency injection은 함수 기본값에서 호출하는 게 표준 패턴
 extend-immutable-calls = [
     "fastapi.Depends",
     "fastapi.Query",
