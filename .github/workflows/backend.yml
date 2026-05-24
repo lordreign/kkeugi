@@ -61,8 +61,10 @@ jobs:
     env:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
+      - uses: actions/checkout@v4
       - name: Check deploy config
         id: cfg
+        working-directory: ${{ github.workspace }}
         run: |
           if [ -n "$FLY_API_TOKEN" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -70,10 +72,9 @@ jobs:
             echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "::notice::FLY_API_TOKEN 미설정 — 배포 skip. P0 checklist의 Fly.io setup 완료 후 secret 등록 시 자동 활성."
           fi
-      - uses: actions/checkout@v4
-        if: steps.cfg.outputs.ready == 'true'
       - uses: superfly/flyctl-actions/setup-flyctl@master
         if: steps.cfg.outputs.ready == 'true'
       - name: Deploy to Fly.io
         if: steps.cfg.outputs.ready == 'true'
-        run: flyctl deploy --remote-only --config backend/fly.toml --dockerfile backend/Dockerfile
+        # workflow default working-directory가 backend라 fly.toml·Dockerfile은 상대 경로
+        run: flyctl deploy --remote-only --config fly.toml --dockerfile Dockerfile
