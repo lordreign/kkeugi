@@ -4,7 +4,6 @@ Only mounted when ENVIRONMENT == 'development' or 'test'.
 NEVER enable in production — config.py raises if ENVIRONMENT='production' and
 this router is mounted.
 """
-import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr

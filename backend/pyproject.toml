@@ -40,6 +40,19 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B"]
 
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency injection은 함수 기본값에서 호출하는 게 표준 패턴
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Security",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Form",
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
