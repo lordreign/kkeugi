@@ -28,6 +28,11 @@ class AuthApi {
       data: {'refresh_token': refreshToken},
     );
   }
+
+  Future<UserResponse> me() async {
+    final resp = await _dio.get<Map<String, dynamic>>('/v1/me');
+    return UserResponse.fromJson(resp.data!);
+  }
 }
 
 class TokenPairResponse {
