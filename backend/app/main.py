@@ -6,6 +6,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from app.auth.routes import router as auth_router
 from app.config import get_settings
 from app.health.routes import router as health_router
+from app.usage.routes import router as usage_router
 from app.users.routes import router as users_router
 
 settings = get_settings()
@@ -36,6 +37,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(usage_router)
 
 if settings.environment in ("development", "test"):
     from app.auth.dev import router as dev_auth_router

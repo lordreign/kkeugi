@@ -58,6 +58,10 @@ dependencies:
   # Platform channel (W4 UsageStatsManager)
   permission_handler: ^11.3.1
 
+  # W4 sync: 8h 주기 백그라운드 + last_sync 커서
+  workmanager: ^0.9.0  # 0.5.x는 Flutter 3.44 임베딩과 비호환
+  shared_preferences: ^2.3.2
+
   cupertino_icons: ^1.0.8
 
 dev_dependencies:

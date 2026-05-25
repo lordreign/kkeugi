@@ -52,7 +52,8 @@ run:
 	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
 
 test:
-	uv run pytest --cov=app --cov-report=term-missing
+	DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/kkeugi_test \
+		uv run pytest --cov=app --cov-report=term-missing
 
 lint:
 	uv run ruff check app tests
