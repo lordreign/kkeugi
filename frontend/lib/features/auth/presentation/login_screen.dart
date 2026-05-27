@@ -24,7 +24,7 @@ class LoginScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(flex: 3),
-              Text('끊기', style: AppTypography.displayLarge),
+              const Text('끊기', style: AppTypography.displayLarge),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 '한국 1인 워커를 위한 Focus Accountant',
@@ -53,7 +53,7 @@ class LoginScreen extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
-              Text(
+              const Text(
                 '시작하면 이용약관 · 개인정보처리방침에 동의하는 것으로 간주됩니다.',
                 style: AppTypography.labelSmall,
                 textAlign: TextAlign.center,

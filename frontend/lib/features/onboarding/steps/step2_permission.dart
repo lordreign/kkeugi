@@ -21,8 +21,8 @@ class Step2Permission extends StatelessWidget {
       onCta: onNext, // W4: UsageStats Settings intent
       secondaryLabel: '나중에 (수동 입력으로 시작)',
       onSecondary: onNext,
-      child: Column(
-        children: const [
+      child: const Column(
+        children: [
           _Bullet(text: '기기 외부 전송 없음', sub: '모든 분석은 본인 기기 안에서'),
           SizedBox(height: AppSpacing.md),
           _Bullet(text: '언제든 권한 해제 가능', sub: '거부해도 수동 입력으로 사용 가능'),

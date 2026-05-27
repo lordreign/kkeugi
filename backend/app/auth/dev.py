@@ -41,6 +41,9 @@ async def dev_login(
     result = await db.execute(select(User).where(User.google_sub == fake_sub))
     user = result.scalar_one_or_none()
 
+    if user is not None and user.deleted_at is not None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "account deleted")
+
     if user is None:
         user = User(
             google_sub=fake_sub,

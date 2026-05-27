@@ -5,6 +5,7 @@ import '../../shared/widgets/hero_numeral.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
+import '../thresholds/thresholds_provider.dart';
 import '../usage/usage_api.dart';
 import '../usage/usage_providers.dart';
 
@@ -25,6 +26,8 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final permission = ref.watch(usagePermissionProvider);
     final stats = ref.watch(todayStatsProvider);
+    // 한도 알람 활성화 (fire-and-forget) — 초과 시 로컬 알림. 값은 쓰지 않음.
+    ref.watch(thresholdAlarmProvider);
 
     return Scaffold(
       backgroundColor: AppColors.bg,

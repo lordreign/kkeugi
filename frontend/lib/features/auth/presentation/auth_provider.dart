@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_provider.dart';
 import '../../../core/api/env.dart';
 import '../../../core/api/auth_interceptor.dart';
 import '../../../core/storage/secure_storage.dart';
@@ -43,6 +44,7 @@ class AuthNotifier extends Notifier<AuthState> {
     }
     try {
       final me = await _api.me();
+      ref.read(analyticsProvider).identify(me.id);
       state = AuthState.authenticated(me);
     } on DioException {
       await SecureStorage.clear();
@@ -56,6 +58,7 @@ class AuthNotifier extends Notifier<AuthState> {
       accessToken: pair.accessToken,
       refreshToken: pair.refreshToken,
     );
+    ref.read(analyticsProvider).identify(pair.user.id);
     state = AuthState.authenticated(pair.user);
   }
 
@@ -66,6 +69,7 @@ class AuthNotifier extends Notifier<AuthState> {
       accessToken: pair.accessToken,
       refreshToken: pair.refreshToken,
     );
+    ref.read(analyticsProvider).identify(pair.user.id);
     state = AuthState.authenticated(pair.user);
   }
 
@@ -78,6 +82,17 @@ class AuthNotifier extends Notifier<AuthState> {
     } on DioException {
       // non-blocking — 설정에서 재시도 가능
     }
+  }
+
+  /// 회원 탈퇴 — soft delete (PIPA 30일 grace 후 hard delete) + 로컬 토큰 제거.
+  Future<void> deleteAccount() async {
+    try {
+      await dio.delete<void>('/v1/me');
+    } on DioException {
+      // 서버 실패해도 로컬은 정리 — 재시도 시 동일
+    }
+    await SecureStorage.clear();
+    state = const AuthState.unauthenticated();
   }
 
   Future<void> logout() async {

@@ -39,7 +39,7 @@
   - Authorized domain: `kkeugi.kr` (도메인 등록 후)
 - [ ] **Credentials → OAuth Client ID** 생성:
   - Application type: **Android**
-  - Package name: `kr.kkeugi` (Flutter 프로젝트에서 사용)
+  - Package name: `kr.kkeugi.kkeugi` (실제 applicationId — build.gradle.kts 확인)
   - SHA-1 certificate fingerprint: Android keystore에서 추출 (W3에 필요, W2에서 미리 dev/release 양쪽 생성 권장)
   - Web Client ID도 별도 생성 (backend에서 ID token verify용)
 - [ ] GOOGLE_CLIENT_ID (Web Client ID) 복사 → 백엔드 secret으로 저장

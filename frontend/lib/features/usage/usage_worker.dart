@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../../core/api/env.dart';
+import '../../core/notifications/local_notifications.dart';
 import '../../core/storage/secure_storage.dart';
+import '../thresholds/threshold_alarm.dart';
 import 'usage_sync.dart';
 
 const _taskName = 'usageSync';
@@ -26,6 +28,9 @@ void usageSyncCallbackDispatcher() {
         ),
       );
       await runUsageSync(dio: dio);
+      // sync 직후 한도 체크 — 앱이 닫혀 있어도 초과 시 로컬 알람.
+      await LocalNotifications.instance.init();
+      await checkAndNotifyThresholds(dio: dio);
       return true;
     } catch (_) {
       // 실패해도 true 반환 — 재시도 폭주 방지. 8h 다음 주기/foreground가 커버.

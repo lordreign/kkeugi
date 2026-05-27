@@ -26,7 +26,7 @@ class Step5ChannelSelect extends StatelessWidget {
       onCta: hasAtLeastOne ? onComplete : () {},
       child: Column(
         children: [
-          ChannelToggleCard(
+          const ChannelToggleCard(
             icon: Icons.notifications_outlined,
             name: 'FCM 푸시',
             description: '기본 알림 (앱 내 + 푸시)',

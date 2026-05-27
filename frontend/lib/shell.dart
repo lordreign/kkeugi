@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'features/archive/archive_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'theme/colors.dart';
-import 'theme/spacing.dart';
-import 'theme/typography.dart';
 
 /// Bottom tab navigation — DESIGN.md IA tree (홈·회고·설정).
 class HomeShell extends StatefulWidget {
@@ -19,7 +18,7 @@ class _HomeShellState extends State<HomeShell> {
 
   static const _pages = <Widget>[
     HomeScreen(),
-    _ArchivePlaceholder(),
+    ArchiveScreen(),
     SettingsScreen(),
   ];
 
@@ -49,31 +48,6 @@ class _HomeShellState extends State<HomeShell> {
             label: '설정',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ArchivePlaceholder extends StatelessWidget {
-  const _ArchivePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Text(
-              '첫 회고가 도착하면 여기에 모입니다.',
-              textAlign: TextAlign.center,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

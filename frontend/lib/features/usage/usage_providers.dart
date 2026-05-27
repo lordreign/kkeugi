@@ -1,13 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/analytics/analytics.dart';
+import '../../core/analytics/analytics_provider.dart';
 import '../auth/presentation/auth_provider.dart';
 import 'usage_api.dart';
 import 'usage_channel.dart';
 import 'usage_sync.dart';
 
+const _kPermissionTrackedKey = 'kpi_permission_granted';
+
 /// 사용 통계 접근 권한 여부. 설정에서 돌아온 뒤 invalidate로 갱신.
 final usagePermissionProvider = FutureProvider<bool>((ref) async {
-  return UsageChannel.hasPermission();
+  final granted = await UsageChannel.hasPermission();
+  if (granted) {
+    // 최초 1회만 KPI 기록 (권한 동의율).
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool(_kPermissionTrackedKey) ?? false)) {
+      await prefs.setBool(_kPermissionTrackedKey, true);
+      await ref.read(analyticsProvider).track(AnalyticsEvents.permissionGranted);
+    }
+  }
+  return granted;
 });
 
 /// 오늘 통계 — 권한 있으면 sync 후 서버 stats/today 조회.

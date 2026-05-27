@@ -3,6 +3,8 @@
     <!-- 사용 통계 접근 (UsageStatsManager). 시스템 설정에서 사용자가 직접 허용 -->
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
+    <!-- W7: 한도 초과 로컬 알람 (Android 13+ 런타임 권한) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:label="kkeugi"
         android:name="${applicationName}"
