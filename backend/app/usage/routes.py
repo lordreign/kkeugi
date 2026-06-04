@@ -19,10 +19,10 @@ from app.usage.schemas import (
     UsageEventIn,
     WeekStats,
 )
+from app.users.models import User
 
 # V1 EXECUTION PLAN §2 — hourly_value 미설정 시 default 시급(원).
 _DEFAULT_HOURLY_VALUE = 30_000
-from app.users.models import User
 
 router = APIRouter(prefix="/v1/usage", tags=["usage"])
 
