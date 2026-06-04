@@ -59,7 +59,7 @@ W8 ⬜ 출시 (마케팅·data safety) + 본인 store listing·launch
 
 ### B-2. ⏰ Google Play Console
 - [ ] 가입 + 등록비 $25 + **신원 확인**(수일, 개발자 표시명 본명 회피)
-- [ ] 앱 생성: 패키지명 **`kr.kkeugi.kkeugi`**
+- [ ] 앱 생성: 패키지명 **`kr.pjshi.kkeugi`** (2026-06-02 변경, 업로드 후 영구)
 - [ ] 릴리스 **키스토어 생성** + Play App Signing 등록 → 이후 A-1 코드 연결
 - [ ] **SHA-1 두 종류(업로드키 + Play 서명키)를 Google Cloud OAuth에 등록** (안 하면 Google 로그인 실패)
 - [ ] 내부 테스트 트랙에 서명 AAB 업로드 → **그 후** 인앱상품 3종(`kkeugi.cert`/`monthly`/`yearly`) + 7일 trial offer 생성
@@ -128,7 +128,7 @@ fly secrets set \
   TELEGRAM_BOT_TOKEN="..." \
   TELEGRAM_WEBHOOK_SECRET="$(openssl rand -hex 16)" \
   MAILGUN_API_KEY="..." MAILGUN_DOMAIN="mail.kkeugi.kr" \
-  GOOGLE_PLAY_PACKAGE_NAME="kr.kkeugi.kkeugi" \
+  GOOGLE_PLAY_PACKAGE_NAME="kr.pjshi.kkeugi" \
   GOOGLE_PLAY_SERVICE_ACCOUNT_JSON="$(cat play-sa.json)" \
   ENVIRONMENT="production"
 

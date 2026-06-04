@@ -15,7 +15,7 @@ class UsageSession {
 
 /// UsageStatsManager 네이티브 브리지 (MainActivity.kt 의 MethodChannel).
 class UsageChannel {
-  static const _channel = MethodChannel('kr.kkeugi/usage');
+  static const _channel = MethodChannel('kr.pjshi/usage');
 
   /// PACKAGE_USAGE_STATS 허용 여부.
   static Future<bool> hasPermission() async {

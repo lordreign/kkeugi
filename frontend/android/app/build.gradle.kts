@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "kr.kkeugi.kkeugi"
+    namespace = "kr.pjshi.kkeugi"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "kr.kkeugi.kkeugi"
+        applicationId = "kr.pjshi.kkeugi"
         // minSdk 23+ required for flutter_local_notifications + firebase_messaging
         minSdk = maxOf(flutter.minSdkVersion, 23)
         targetSdk = flutter.targetSdkVersion

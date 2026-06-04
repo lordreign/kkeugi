@@ -1,10 +1,11 @@
 # 끊기 (Kkeugi)
 
-> 한국 1인 워커(개발자·디자이너·작가·연구자·프리·1인 사업자)를 위한 디지털 디톡스 Android 앱 (Flutter).
-> SNS·쇼츠·게임·웹툰 끊기 타이머 + UsageStatsManager 자동 import + AI 주간 "시간 빚 환산" 리포트 + **multi-channel retention** (FCM + 이메일 + Telegram).
-> **V1 = Google Play 인앱결제** (사업자 X 가능): Hybrid 일회 ₩11K + 월 ₩5.9K + 연 ₩39K + 7일 free trial + 베타 50% + 출시 7일 30%.
-> 사업자 등록 trigger = **월 net 매출 ₩35-50만 도달**. V2 (사업자 후) = Toss·카톡 추가.
+> 한국 1인 워커(개발자·디자이너·작가·연구자·프리·1인 사업자)를 위한 **시간빚(Time Debt) 추적** Android 앱 (Flutter).
+> UsageStatsManager 자동 import + AI 주간 "시간 빚 → 매출" 환산 리포트 + **multi-channel retention** (FCM + 이메일 + Telegram).
+> **V1 = freemium with paid 매출환산**: 무료(앱 + 시간빚 분 + 회고 카드 + 공유 + 한도 1개) / 유료(매출환산 ₩ 표시 + 한도 무제한). Google Play 인앱결제 일회 ₩11K + 월 ₩5.9K + 연 ₩39K + 7일 free trial.
+> 사업자 등록 trigger = **월 net 매출 ₩35-50만 도달**. V2 (사업자 후) = Toss·카톡·iOS Companion 추가.
 
+**현재 실행 plan**: [`docs/V1_EXECUTION_PLAN.md`](docs/V1_EXECUTION_PLAN.md) — 출시 전 7개 작업 + Pivot Trigger + PMF KPI.
 **PRD**: [`docs/PRD.md`](docs/PRD.md) (원본: `find_business/docs/candidates/b2c_mobile_app/deepdive/2026-05-18-kkeugi-habit-stop-timer.md`)
 
 ## 한눈에

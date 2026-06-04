@@ -128,3 +128,51 @@ async def test_stats_week(client, auth):
     data = r.json()
     assert data["total_minutes"] == 30
     assert len(data["by_day"]) == 7
+
+
+async def test_stats_month_loss_default_hourly(client, auth):
+    """V1 EXECUTION PLAN §2: 시급 미설정 시 default ₩30,000/h."""
+    headers, _ = auth
+    now = datetime.now(UTC)
+    # 60분 (3600초) 흩어짐
+    await client.post(
+        "/v1/usage/batch",
+        json={"events": [_event(now, category="sns", seconds=3600)]},
+        headers=headers,
+    )
+    r = await client.get("/v1/usage/stats/month-loss", headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert data["minutes"] == 60
+    assert data["hourly_value"] == 30000
+    # 60분 × ₩30,000/60 = ₩30,000
+    assert data["loss_won"] == 30000
+
+
+async def test_stats_month_loss_with_user_hourly(client, auth):
+    """사용자가 시급 설정 시 그 값 사용."""
+    headers, _ = auth
+    # 시급 ₩50,000 설정
+    await client.patch("/v1/me", json={"hourly_value": 50000}, headers=headers)
+    now = datetime.now(UTC)
+    # 30분 (1800초)
+    await client.post(
+        "/v1/usage/batch",
+        json={"events": [_event(now, category="sns", seconds=1800)]},
+        headers=headers,
+    )
+    r = await client.get("/v1/usage/stats/month-loss", headers=headers)
+    data = r.json()
+    assert data["minutes"] == 30
+    assert data["hourly_value"] == 50000
+    # 30분 × ₩50,000/60 = ₩25,000
+    assert data["loss_won"] == 25000
+
+
+async def test_stats_month_loss_empty(client, auth):
+    """이번 달 데이터 없으면 0."""
+    headers, _ = auth
+    r = await client.get("/v1/usage/stats/month-loss", headers=headers)
+    data = r.json()
+    assert data["minutes"] == 0
+    assert data["loss_won"] == 0

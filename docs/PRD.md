@@ -24,12 +24,23 @@ PWA → Android 네이티브 (Flutter) 단일 시드로 전환 — 핵심 wedge 
 GO/NO-GO: GO (Android UsageStatsManager 표준 API, PoC 불요. iOS는 v2 격하).
 -->
 
-# 끊기 — 1인 워커 디지털 디톡스 Android 앱 (Flutter) · PRD
+# 끊기 — 한국 1인 워커 시간빚 추적 Android 앱 (Flutter) · PRD
 
 ## 1. 요약
 
-### 한 문장 정의 (2026-05-24 V1 = 인앱결제 paid product re-pivot)
-**한국 1인 워커**(개발자·디자이너·작가·연구자·프리·1인 사업자)에게 SNS·쇼츠·게임·웹툰 끊기 타이머 + UsageStatsManager 자동 import + AI 주간 "시간 빚 환산" 리포트를 제공하는 **인앱결제 paid Android 네이티브 앱 (Flutter)**. 주간 카드는 **앱 + FCM + 이메일 + Telegram (사용자 선택)** multi-channel 발송. **V1 = Google Play Billing 인앱결제 (사업자 X, 본업 유지)** — 일회 ₩11,000 / 월 ₩5,900 / 연 ₩39,000 hybrid + 7일 free trial. **사업자 등록 trigger = 월 net 매출 ₩35-50만 도달**. **V2 (사업자 등록 후) = Toss 외부결제 + 카톡 알림톡 추가** (Google 30% 수수료 → Toss 3.3% 절감).
+### 한 문장 정의 (2026-06-05 freemium with paid 매출환산 framing 정정)
+**한국 1인 워커**(개발자·디자이너·작가·연구자·프리·1인 사업자)에게 SNS·쇼츠·게임·웹툰의 시간빚(Time Debt)을 보여주는 **무료 사용 가능 + 매출환산 잠금 해제 paid Android 네이티브 앱 (Flutter)**. UsageStatsManager 자동 import + AI 주간 "시간 빚 → 매출" 환산 리포트. 주간 카드는 **앱 + FCM + 이메일 + Telegram (사용자 선택)** multi-channel 발송. **V1 = Google Play Billing freemium (사업자 X, 본업 유지)** — 무료 + 일회 ₩11,000 / 월 ₩5,900 / 연 ₩39,000 hybrid + 7일 free trial. **사업자 등록 trigger = 월 net 매출 ₩35-50만 도달**. **V2 (사업자 등록 후) = Toss 외부결제 + 카톡 알림톡 추가** (Google 30% 수수료 → Toss 3.3% 절감).
+
+### V1 무료/유료 정확한 경계 (V1_EXECUTION_PLAN §1·§2 갱신)
+- **무료**: 앱 사용 전체 + 사용 통계 자동 import + 시간빚 분 단위 표시 + 회고 카드 본문 + 회고 카드 1-tap 공유 + 한도 **1개**(retention 메커니즘 확보)
+- **유료 (paid lock)**: **매출환산 ₩ 표시 (wedge #1 hook)** + 한도 **2개 이상** + 리포트 재생성 + (V1.5) Streak·AI 행동 코치
+- **7일 free trial**: 월/연 구독 첫 7일간 전 paid 기능 무료
+
+### 포지셔닝 (V1_EXECUTION_PLAN §3 — 2026-06-05 변경)
+- 메인 카피: "**시간빚 추적**" (시간 빚을 보여주는 앱)
+- 금지 표현 (메인 카피에서 X): "디지털 디톡스 앱" / "AI 생산성 앱" / "집중력 관리 앱"
+- ASO 키워드 (앱 설명 안 자연스럽게): 디톡스 / 집중력 / SNS 끊기 / 쇼츠 차단 / 시간 관리
+- Play Store 카테고리: 자기계발
 
 ### 핵심 후크
 1. 한국 디지털 디톡스 vertical 비어있음 (Forest·간단 모두 1인 워커·시간 빚 환산·multi-channel wedge 안 함)
@@ -850,9 +861,98 @@ M3 NO-GO 도달 시 또는 1년 sustained operation 후:
 3. 카카오 알림톡 일일 요약 → 7일 retention (target 40%+)
 4. 일회 ₩9,900 결제 마찰 → 베타 → 유료 전환율 (target 5%+)
 
+### V1 PMF KPI 재정의 (V1_EXECUTION_PLAN §4 — 2026-06-05 갱신)
+
+기존: 다운로드 / 결제율 중심 → 변경: D30 retention 우선 + 공유율 선행지표.
+
+| Tier | KPI | Base | Stretch | 측정 timing | 리뷰 cadence |
+|---|---|---|---|---|---|
+| 1 | D30 Retention | **12%** | 25% | 출시 30일 후 | 월간 |
+| 2 | 회고 카드 공유율 (report_shared / report_viewed) | **5%** | 15% | 매주 | 주간 |
+| 3 | 유료 전환율 | **4-7%** | 12% | 즉시 누적 | 주간 |
+
+근거: 디톡스 카테고리 평균 D30 = 8-15% (data.ai 추정), 일반 SaaS 공유율 3-7%. base = 카테고리 median, stretch = best-in-class.
+
+Mixpanel 4종 view 셋업 (PHASE 2-D 후 본인 작업):
+1. Funnel `permission_granted → report_viewed → paywall_viewed → purchase_completed`
+2. Cohort Retention chart (D1·D7·D14·D30)
+3. 공유율 ratio chart (주간 report_shared / report_viewed)
+4. Daily KPI dashboard (신규 install · paid 전환 · DAU)
+
+### Pivot Trigger (V1_EXECUTION_PLAN — M1 시점 결정)
+
+V1 출시 후 **30일 경과 시점**에 정량 + 정성 동시 충족 시 매출환산 가설 실패로 판단, V1.5에서 AI 행동 코치를 paid hook 으로 이전 + 매출환산 무료화.
+
+| 조건 | 임계치 |
+|---|---|
+| 정량 | 누적 paid conversion < **2%** |
+| 정성 | 인터뷰 5명 중 **4명 이상**이 "₩ 표시 무감각" 응답 |
+
+둘 다 충족하지 않으면 V1 path 유지 + V1.5 보강(Streak·공유 강화).
+
 ---
 
-## 14. 부록
+## 14. Employment Risk (2026-06-05 신규, V1_EXECUTION_PLAN §5)
+
+**왜 별도 섹션인가**: 본업 겸업 발각 risk는 끊기의 **모든 사업적 결정의 base**. 이미 §11 risk #6 에 포함되어 있으나, 그 영향 범위가 *모든* 결정(가격·기술·플랫폼·홍보·세금)에 미치므로 별도 섹션으로 승격.
+
+### 영향 범위 (모든 V1 결정이 이 risk 의 함수)
+- **사업자 등록 X** (V1) → 카톡·Toss 격하 → multi-channel retention 채택
+- **Google Play Individual 계정** → 클로즈드 테스트 12명/14일 의무
+- **개발자 표시명 = `pjshi`** (본명 회피)
+- **세금 신고** = 종합소득세 본인 신고 (회사 연말정산 영향 가능성)
+- **사업자 등록 trigger** = V2 진입 = 본업 정리 검토 시점
+
+### 관리 대상 6축
+
+| 축 | 통제 |
+|---|---|
+| 개발자명 | Play Console = `pjshi`, 본명 X. Google Cloud / Anthropic / Fly.io 가입 시 동일 |
+| 결제 구조 | V1 = Google Play Billing Individual ($25 평생, 본업 정보 미입력). V2 = 사업자 등록 후 Toss |
+| 도메인 | `kkeugi.kr` whois privacy 보호 등록 (가비아·후이즈 옵션). 회사 도메인 이메일 X |
+| 개인정보 | 개인정보처리방침 contact email = 개인 메일. 회사 메일 X. 본명 노출 X |
+| 세금 신고 | 매출 발생 후 매년 5월 종합소득세 본인 신고. 연 매출 ₩240만+ 시 세무사 자문 (₩5-10만) |
+| 사업자 등록 시점 | M3 매출 ₩35-50만/월 trigger 도달 + 본인 직장 관계 정리 후 — V2 진입과 결합 |
+
+### 발각 risk 정량화
+- 발각 시: 즉시 해고 사유 + 손해배상 청구 가능 (한국 IT 대기업 사례 있음)
+- 비용: **본업 손실 > 사업 손실** — 따라서 V1 의 모든 결정은 "발각 vector 최소화" 가 base
+- 통제 효과 측정: X(트위터) 빌드인퍼블릭 게시 빈도·표현·식별자 통제
+
+### V1 출시 후 모니터링
+- M1: Play Store 본인 정보 노출 점검 (개발자명·아이콘·스크린샷에 본명 검출 키워드 X)
+- M3: 세무사 자문 → 사업자 등록 vs V1 유지 path 결정
+- M6: V2 진입 시 본인 직장 정리 시점 결정
+
+---
+
+## 15. V2 우선순위 재정렬 (2026-06-05, V1_EXECUTION_PLAN §6)
+
+기존: V2 = iOS 진입 우선 → **변경: V2 = 사업자 등록 + Toss + 카톡, iOS는 V2 후반 또는 V3**.
+
+### V1 (M0 ~ M3)
+- PMF 검증 (매출환산 가설)
+- D30 12% / 공유율 5% / paid 4-7%
+
+### V1.5 (M1 ~ M3, 정량 KPI 충족 시 시작)
+1. **Streak** (활성 Threshold + 미초과 조건, 카테고리 별 streak + 주 1회 grace day)
+2. **공유 강화** (Streak 표시 + 회고 카드 V2 디자인)
+3. **AI 행동 코치** (월간 Deep Report — 매월 첫 일요일 22:00, 무료 1줄 + paid 4-6줄, 로컬 패턴 분석 + LLM 요약만)
+
+### V2 (M3 매출 trigger 도달 + 본업 정리 후)
+1. 사업자 등록
+2. Toss 외부 결제 (Google Play 30% → 3.3%, 1,000명 paid 시 +₩1.5M/월 margin gain)
+3. 카카오톡 알림톡 추가
+4. **iOS Companion 은 V2 후반 또는 V3** (사업자 등록 + Apple Developer $99 + 외주 ₩200-500만 비용 동반 시점)
+
+### 변경 사유
+- iOS = 자본·시간 추가 비용 큰 데 비해 V1 PMF 검증 전엔 ROI 불명확
+- Toss 진입 = 코드 작업은 작지만 사업자 등록·심사 리드타임 길어 일찍 시작
+- 카톡 = 한국 1인 워커 대상 retention 채널로 가치 큼
+
+---
+
+## 16. 부록
 
 ### 출처 (URL)
 

@@ -49,7 +49,7 @@
 
 ### 2. 앱 생성 + applicationId 확정
 - [ ] Play Console → 앱 만들기
-- [ ] **패키지명 = `kr.kkeugi.kkeugi`** ⚠️ (W2 문서의 `kr.kkeugi`는 오기 — 실제 build.gradle.kts applicationId는 `kr.kkeugi.kkeugi`)
+- [ ] **패키지명 = `kr.pjshi.kkeugi`** ⚠️ (2026-06-02 변경: 초기 `kr.kkeugi.kkeugi` → 브랜드 네임스페이스 `kr.pjshi.kkeugi`. **업로드 후 영구 변경 불가** — 반드시 이 값으로 앱 생성)
 - [ ] 앱 이름: 끊기 (Kkeugi), 기본 언어: 한국어
 - [ ] 무료/유료: **무료**(인앱결제로 수익화하므로 앱 자체는 무료)
 
@@ -143,7 +143,7 @@ fly secrets set \
 | A. 클로즈드 테스트 12명/14일 계획 | | | W7 베타 = 시계 시작 |
 | B. 신원 확인 제출 | | | 수일 소요, 발각 risk 통제 |
 | 1. Play Console Individual 가입 ($25) | | | |
-| 2. 앱 생성 (`kr.kkeugi.kkeugi`) | | | 패키지명 정정 |
+| 2. 앱 생성 (`kr.pjshi.kkeugi`) | | | 2026-06-02 브랜드 네임스페이스 |
 | 3. 릴리스 키스토어 + App Signing + SHA-1 OAuth 등록 | | | Google Sign-In 연동 |
 | 4. 내부 테스트 AAB 업로드 | | | 인앱상품 선결 |
 | 5. 인앱상품 3종 + 7일 trial | | | |

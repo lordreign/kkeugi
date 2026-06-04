@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 abstract final class AnalyticsEvents {
   static const permissionGranted = 'permission_granted'; // usage stats 권한 동의
   static const channelToggled = 'channel_toggled'; // 알림 채널 on/off
+  static const paywallViewed = 'paywall_viewed'; // V1 EXECUTION PLAN §4 funnel step
   static const purchaseCompleted = 'purchase_completed'; // 결제 완료
   static const reportViewed = 'report_viewed'; // 주간 회고 열람
   static const reportShared = 'report_shared'; // 회고 카드 공유 (바이럴)

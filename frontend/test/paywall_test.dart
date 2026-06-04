@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kkeugi/features/payments/payment_api.dart';
 import 'package:kkeugi/features/payments/payments_providers.dart';
 import 'package:kkeugi/features/payments/paywall_screen.dart';
+import 'package:kkeugi/features/usage/usage_api.dart';
 
 /// verify 호출만 기록하는 fake PaymentApi (네트워크 없음).
 class _FakePaymentApi extends PaymentApi {
@@ -30,7 +31,13 @@ class _FakePaymentApi extends PaymentApi {
 Future<void> _openPaywall(WidgetTester tester, _FakePaymentApi fake) async {
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [paymentApiProvider.overrideWithValue(fake)],
+      overrides: [
+        paymentApiProvider.overrideWithValue(fake),
+        // 손실 누적 배너 — 네트워크 호출 회피, 0 값으로 SizedBox.shrink 처리
+        paywallMonthLossProvider.overrideWith(
+          (ref) async => const MonthLoss(minutes: 0, lossWon: 0, hourlyValue: 30000),
+        ),
+      ],
       child: MaterialApp(
         home: Scaffold(
           body: Builder(

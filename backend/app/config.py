@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # Google Play Billing 서버 영수증 검증 (Step 6 실연동). dev는 FakeVerifier.
     google_play_package_name: str = Field(
-        "kr.kkeugi.kkeugi", alias="GOOGLE_PLAY_PACKAGE_NAME",
+        "kr.pjshi.kkeugi", alias="GOOGLE_PLAY_PACKAGE_NAME",
     )
     google_play_service_account_json: str | None = Field(
         None, alias="GOOGLE_PLAY_SERVICE_ACCOUNT_JSON",

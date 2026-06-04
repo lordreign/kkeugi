@@ -12,12 +12,16 @@ from app.usage.models import UsageEvent, UsageEventDedupe
 from app.usage.schemas import (
     CategoryStat,
     DayStat,
+    MonthLoss,
     TodayStats,
     UsageBatchRequest,
     UsageBatchResponse,
     UsageEventIn,
     WeekStats,
 )
+
+# V1 EXECUTION PLAN §2 — hourly_value 미설정 시 default 시급(원).
+_DEFAULT_HOURLY_VALUE = 30_000
 from app.users.models import User
 
 router = APIRouter(prefix="/v1/usage", tags=["usage"])
@@ -173,3 +177,35 @@ async def stats_week(
         by_category=by_category,
         by_day=by_day,
     )
+
+
+@router.get("/stats/month-loss", response_model=MonthLoss)
+async def stats_month_loss(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> MonthLoss:
+    """월초(user tz) ~ 현재 누적 손실. paywall 직전 표시용.
+
+    무료/유료 모두 호출 가능. paywall 진입 trigger 에서만 노출(홈 상시 X).
+    """
+    tz = ZoneInfo(user.timezone)
+    now = datetime.now(UTC)
+    local_now = now.astimezone(tz)
+    local_month_start = local_now.replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0,
+    )
+    start = local_month_start.astimezone(UTC)
+
+    secs = (
+        await db.execute(
+            select(func.coalesce(func.sum(UsageEvent.duration_seconds), 0)).where(
+                UsageEvent.user_id == user.id, UsageEvent.occurred_at >= start,
+            ),
+        )
+    ).scalar_one()
+
+    minutes = round((secs or 0) / 60)
+    hourly = user.hourly_value or _DEFAULT_HOURLY_VALUE
+    # loss_won = minutes × (hourly / 60). 분당 ₩.
+    loss_won = round(minutes * hourly / 60)
+    return MonthLoss(minutes=minutes, loss_won=loss_won, hourly_value=hourly)

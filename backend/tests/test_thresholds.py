@@ -29,10 +29,26 @@ async def test_list_empty(client, auth):
     assert r.json() == []
 
 
-async def test_create_requires_paid(client, auth):
+async def test_create_first_free_succeeds(client, auth):
+    """V1 EXECUTION PLAN §1: 무료 사용자도 1개까지는 생성 가능."""
     headers, _ = auth
     r = await client.post(
         "/v1/thresholds", json={"category": "shorts", "daily_limit_minutes": 30}, headers=headers,
+    )
+    assert r.status_code == 201
+    assert r.json()["category"] == "shorts"
+
+
+async def test_create_second_requires_paid(client, auth):
+    """무료는 1개 한도. 2개째 시도하면 402."""
+    headers, _ = auth
+    # 1개째 생성 — 무료 OK
+    await client.post(
+        "/v1/thresholds", json={"category": "shorts", "daily_limit_minutes": 30}, headers=headers,
+    )
+    # 2개째 — 무료 차단
+    r = await client.post(
+        "/v1/thresholds", json={"category": "sns", "daily_limit_minutes": 20}, headers=headers,
     )
     assert r.status_code == 402
 
@@ -40,13 +56,17 @@ async def test_create_requires_paid(client, auth):
 async def test_create_and_list_when_paid(client, auth):
     headers, _ = auth
     await _make_paid(client, headers)
-    r = await client.post(
+    # 유료는 여러 개 생성 가능
+    r1 = await client.post(
         "/v1/thresholds", json={"category": "shorts", "daily_limit_minutes": 30}, headers=headers,
     )
-    assert r.status_code == 201
-    assert r.json()["category"] == "shorts"
+    assert r1.status_code == 201
+    r2 = await client.post(
+        "/v1/thresholds", json={"category": "sns", "daily_limit_minutes": 20}, headers=headers,
+    )
+    assert r2.status_code == 201
     lst = await client.get("/v1/thresholds", headers=headers)
-    assert len(lst.json()) == 1
+    assert len(lst.json()) == 2
 
 
 async def test_create_duplicate_category_conflict(client, auth):

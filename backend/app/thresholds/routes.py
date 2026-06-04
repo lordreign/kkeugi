@@ -1,17 +1,20 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.deps import get_current_user
-from app.payments.entitlement import require_paid
+from app.payments.entitlement import get_active_subscription
 from app.thresholds.models import Threshold
 from app.thresholds.schemas import ThresholdCreate, ThresholdOut, ThresholdUpdate
 from app.users.models import User
 
 router = APIRouter(prefix="/v1/thresholds", tags=["thresholds"])
+
+# V1 EXECUTION PLAN §1 — 무료 사용자는 한도 1개까지, 2개 이상부터 유료.
+FREE_THRESHOLD_LIMIT = 1
 
 
 async def _owned(db: AsyncSession, threshold_id: uuid.UUID, user_id) -> Threshold:
@@ -40,9 +43,22 @@ async def list_thresholds(
 @router.post("", response_model=ThresholdOut, status_code=status.HTTP_201_CREATED)
 async def create_threshold(
     body: ThresholdCreate,
-    user: User = Depends(require_paid),  # 한도 생성은 유료
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> Threshold:
+    # V1 EXECUTION PLAN §1: 무료는 1개까지, 2개째부터 paid 필요.
+    count = (
+        await db.execute(
+            select(func.count(Threshold.id)).where(Threshold.user_id == user.id),
+        )
+    ).scalar_one()
+    if count >= FREE_THRESHOLD_LIMIT:
+        sub = await get_active_subscription(db, user.id)
+        if sub is None:
+            raise HTTPException(
+                status.HTTP_402_PAYMENT_REQUIRED,
+                f"free tier allows {FREE_THRESHOLD_LIMIT} threshold; upgrade for more",
+            )
     exists = (
         await db.execute(
             select(Threshold).where(

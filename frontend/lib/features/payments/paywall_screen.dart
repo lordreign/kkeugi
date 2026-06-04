@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/analytics/analytics.dart';
+import '../../core/analytics/analytics_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
+import '../usage/usage_api.dart';
+import '../auth/presentation/auth_provider.dart';
 import 'billing_service.dart';
 import 'payments_providers.dart';
+
+/// V1 EXECUTION PLAN §2 — paywall 진입 시 월초~현재 손실 누적 1회 표시.
+/// 홈 등 상시 화면 X → paid 가치 보존.
+final paywallMonthLossProvider = FutureProvider.autoDispose<MonthLoss>(
+  (ref) => UsageApi(ref.watch(dioProvider)).monthLoss(),
+);
 
 /// 끊기 Pro paywall — DESIGN 톤(압박 X, 객관). D7 리포트 후 / 매출 환산 진입 시 노출.
 class PaywallScreen extends ConsumerStatefulWidget {
@@ -18,6 +28,15 @@ class PaywallScreen extends ConsumerStatefulWidget {
 class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   String _selectedId = 'kkeugi.monthly'; // 기본 추천
   bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // V1 EXECUTION PLAN §4 funnel: paywall_viewed (홈→회고→paywall→결제 추적).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(analyticsProvider).track(AnalyticsEvents.paywallViewed);
+    });
+  }
 
   BillingProduct get _selected =>
       kCatalog.firstWhere((p) => p.id == _selectedId);
@@ -55,25 +74,36 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: AppSpacing.md),
-              const Text(
-                '흩어진 시간을\n매출로 환산해드려요.',
-                style: AppTypography.headlineMedium,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                '주간 회고 + 시간 빚의 매출 환산 + 카테고리별 한도 알림. '
-                '압박 없이, 객관적으로.',
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              for (final p in kCatalog)
-                _PlanCard(
-                  product: p,
-                  selected: p.id == _selectedId,
-                  onTap: () => setState(() => _selectedId = p.id),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: AppSpacing.md),
+                      const Text(
+                        '흩어진 시간을\n매출로 환산해드려요.',
+                        style: AppTypography.headlineMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        '주간 회고 + 시간 빚의 매출 환산 + 카테고리별 한도 알림. '
+                        '압박 없이, 객관적으로.',
+                        style: AppTypography.bodyMedium
+                            .copyWith(color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      const _MonthLossBanner(),
+                      const SizedBox(height: AppSpacing.lg),
+                      for (final p in kCatalog)
+                        _PlanCard(
+                          product: p,
+                          selected: p.id == _selectedId,
+                          onTap: () => setState(() => _selectedId = p.id),
+                        ),
+                    ],
+                  ),
                 ),
-              const Spacer(),
+              ),
               if (sub)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -115,6 +145,70 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// V1 EXECUTION PLAN §2 — 손실 누적 카드. 월초~현재.
+/// "회복" 이 아니라 "손실" framing — 손실 회피 심리 자극.
+class _MonthLossBanner extends ConsumerWidget {
+  const _MonthLossBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loss = ref.watch(paywallMonthLossProvider);
+    return loss.when(
+      loading: () => const SizedBox(height: 80),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (m) {
+        if (m.minutes <= 0) return const SizedBox.shrink();
+        final won = m.lossWon
+            .toString()
+            .replaceAllMapped(
+              RegExp(r'(\d)(?=(\d{3})+$)'),
+              (mm) => '${mm[1]},',
+            );
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.surface2,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('이번 달', style: AppTypography.monoSmall()),
+              const SizedBox(height: AppSpacing.xs),
+              RichText(
+                text: TextSpan(
+                  style: AppTypography.bodyLarge,
+                  children: [
+                    TextSpan(
+                      text: '${m.minutes}분',
+                      style: AppTypography.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const TextSpan(text: '을 흩었어요. '),
+                    const TextSpan(text: '\n예상 손실 '),
+                    TextSpan(
+                      text: '₩$won',
+                      style: AppTypography.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -63,6 +63,25 @@ class TodayStats {
   final List<CategoryStat> byCategory;
 }
 
+/// V1 EXECUTION PLAN §2 — paywall 직전 손실 누적 표시 (월초~현재).
+class MonthLoss {
+  const MonthLoss({
+    required this.minutes,
+    required this.lossWon,
+    required this.hourlyValue,
+  });
+
+  factory MonthLoss.fromJson(Map<String, dynamic> j) => MonthLoss(
+        minutes: j['minutes'] as int,
+        lossWon: j['loss_won'] as int,
+        hourlyValue: j['hourly_value'] as int,
+      );
+
+  final int minutes;
+  final int lossWon;
+  final int hourlyValue;
+}
+
 class UsageApi {
   UsageApi(this._dio);
 
@@ -80,5 +99,12 @@ class UsageApi {
   Future<TodayStats> today() async {
     final resp = await _dio.get<Map<String, dynamic>>('/v1/usage/stats/today');
     return TodayStats.fromJson(resp.data!);
+  }
+
+  Future<MonthLoss> monthLoss() async {
+    final resp = await _dio.get<Map<String, dynamic>>(
+      '/v1/usage/stats/month-loss',
+    );
+    return MonthLoss.fromJson(resp.data!);
   }
 }

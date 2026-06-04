@@ -1,4 +1,4 @@
-package kr.kkeugi.kkeugi
+package kr.pjshi.kkeugi
 
 import android.app.AppOpsManager
 import android.app.usage.UsageEvents
@@ -15,7 +15,7 @@ import io.flutter.plugin.common.MethodChannel
 /**
  * UsageStatsManager 브리지 (wedge #2: 사용 시간 자동 import).
  *
- * Flutter platform channel "kr.kkeugi/usage":
+ * Flutter platform channel "kr.pjshi/usage":
  *  - hasPermission()            → Boolean (PACKAGE_USAGE_STATS 허용 여부)
  *  - openUsageAccessSettings()  → 시스템 사용 통계 접근 설정 화면 열기
  *  - queryUsageSessions(start,end) → 포그라운드 세션 리스트
@@ -25,7 +25,7 @@ import io.flutter.plugin.common.MethodChannel
  * (aggregate가 아닌 세션 단위 → 정확한 occurred_at + 작업시간대 판별 가능).
  */
 class MainActivity : FlutterActivity() {
-    private val channelName = "kr.kkeugi/usage"
+    private val channelName = "kr.pjshi/usage"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

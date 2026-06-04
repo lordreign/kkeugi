@@ -48,3 +48,15 @@ class WeekStats(BaseModel):
     total_minutes: int
     by_category: list[CategoryStat]
     by_day: list[DayStat]           # 최근 7일 (오래된→최신)
+
+
+class MonthLoss(BaseModel):
+    """V1 EXECUTION PLAN §2 — paywall 직전 손실 누적 표시.
+
+    period: 월초(user tz) ~ 현재.
+    loss_won = minutes × (hourly_value / 60). hourly_value 미설정 시 30,000 default.
+    """
+
+    minutes: int
+    loss_won: int
+    hourly_value: int   # 사용된 시급(설정 없으면 default)

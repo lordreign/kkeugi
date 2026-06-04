@@ -8,6 +8,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from app.auth.routes import router as auth_router
 from app.channels.routes import router as fcm_router
 from app.config import get_settings
+from app.feature_flags import router as feature_flags_router
 from app.health.routes import router as health_router
 from app.payments.routes import router as payments_router
 from app.reports.routes import router as reports_router
@@ -66,6 +67,7 @@ app.include_router(payments_router)
 app.include_router(reports_router)
 app.include_router(fcm_router)
 app.include_router(thresholds_router)
+app.include_router(feature_flags_router)
 
 if settings.environment in ("development", "test"):
     from app.auth.dev import router as dev_auth_router

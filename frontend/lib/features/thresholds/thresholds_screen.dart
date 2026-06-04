@@ -14,7 +14,10 @@ import 'thresholds_provider.dart';
 
 const _allCategories = ['sns', 'shorts', 'game', 'webtoon', 'other'];
 
-/// 카테고리별 일일 한도 — 초과 시 로컬 알람(Step 3). 생성은 유료.
+/// V1 EXECUTION PLAN §1: 무료는 한도 1개까지, 2번째부터 유료.
+const _freeThresholdLimit = 1;
+
+/// 카테고리별 일일 한도 — 초과 시 로컬 알람. 무료 1개, 추가는 유료.
 class ThresholdsScreen extends ConsumerWidget {
   const ThresholdsScreen({super.key});
 
@@ -37,6 +40,13 @@ class ThresholdsScreen extends ConsumerWidget {
           data: (items) {
             final used = items.map((t) => t.category).toSet();
             final canAdd = used.length < _allCategories.length;
+            // 무료 free quota 안에선 추가 무료. 그 이상은 유료(paid 필요).
+            final needsPaywall = !paid && items.length >= _freeThresholdLimit;
+            final ctaLabel = !canAdd
+                ? '모든 카테고리 설정됨'
+                : needsPaywall
+                    ? '한도 더 추가 (Pro)'
+                    : '한도 추가';
             return Column(
               children: [
                 Expanded(
@@ -44,11 +54,22 @@ class ThresholdsScreen extends ConsumerWidget {
                       ? Center(
                           child: Padding(
                             padding: const EdgeInsets.all(AppSpacing.lg),
-                            child: Text(
-                              '한도를 설정하면 초과할 때 조용히 알려드려요.\n압박은 없어요.',
-                              textAlign: TextAlign.center,
-                              style: AppTypography.bodyMedium
-                                  .copyWith(color: AppColors.textSecondary),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '한도를 설정하면 초과할 때 조용히 알려드려요.\n압박은 없어요.',
+                                  textAlign: TextAlign.center,
+                                  style: AppTypography.bodyMedium
+                                      .copyWith(color: AppColors.textSecondary),
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                const Text(
+                                  '무료는 1개까지 · 더 추가는 Pro',
+                                  textAlign: TextAlign.center,
+                                  style: AppTypography.labelSmall,
+                                ),
+                              ],
                             ),
                           ),
                         )
@@ -67,23 +88,23 @@ class ThresholdsScreen extends ConsumerWidget {
                       onPressed: !canAdd
                           ? null
                           : () {
-                              if (paid) {
+                              if (needsPaywall) {
                                 Navigator.of(context).push(
                                   MaterialPageRoute<void>(
-                                    builder: (_) => AddThresholdScreen(used: used),
+                                    builder: (_) => const PaywallScreen(),
                                   ),
                                 );
                               } else {
                                 Navigator.of(context).push(
                                   MaterialPageRoute<void>(
-                                    builder: (_) => const PaywallScreen(),
+                                    builder: (_) => AddThresholdScreen(used: used),
                                   ),
                                 );
                               }
                             },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                        child: Text(canAdd ? '한도 추가' : '모든 카테고리 설정됨'),
+                        child: Text(ctaLabel),
                       ),
                     ),
                   ),
