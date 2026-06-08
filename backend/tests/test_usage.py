@@ -97,6 +97,28 @@ async def test_stats_today(client, auth):
     assert data["by_category"][0]["category"] == "sns"
 
 
+async def test_stats_today_by_app(client, auth):
+    headers, _ = auth
+    now = datetime.now(UTC)
+    events = [
+        _event(now, category="sns", seconds=1200, pkg="com.instagram.android"),   # 20분
+        _event(now, category="shorts", seconds=600, pkg="com.google.android.youtube"),  # 10분
+        _event(now, category="other", seconds=300, pkg="com.toss.app"),            # 5분
+    ]
+    await client.post("/v1/usage/batch", json={"events": events}, headers=headers)
+
+    r = await client.get("/v1/usage/stats/today", headers=headers)
+    assert r.status_code == 200
+    by_app = r.json()["by_app"]
+    # 분 내림차순 + package_name 그대로
+    assert [a["package_name"] for a in by_app] == [
+        "com.instagram.android",
+        "com.google.android.youtube",
+        "com.toss.app",
+    ]
+    assert by_app[0]["minutes"] == 20
+
+
 async def test_stats_today_excludes_other_days(client, auth):
     headers, _ = auth
     now = datetime.now(UTC)

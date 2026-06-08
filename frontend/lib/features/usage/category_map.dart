@@ -43,8 +43,12 @@ const Map<String, String> _contains = {
   'tiktok': 'shorts',
 };
 
-/// 패키지명을 카테고리로. 알 수 없으면 null (= 추적 대상 아님, 저장 안 함).
-String? categoryForPackage(String packageName) {
+/// 패키지명을 카테고리로.
+///
+/// 하이브리드: 알려진 앱은 SNS/쇼츠/게임/웹툰으로 자동 분류하고,
+/// 그 외(런처에 뜨는 사용자 앱)는 모두 `other`로 포착한다 — 앱별 drill-down에서
+/// 그대로 보여주기 위함. 시스템 노이즈는 네이티브 launchablePackages()가 이미 제외.
+String categoryForPackage(String packageName) {
   final exact = _exact[packageName];
   if (exact != null) return exact;
 
@@ -52,5 +56,5 @@ String? categoryForPackage(String packageName) {
   for (final entry in _contains.entries) {
     if (lower.contains(entry.key)) return entry.value;
   }
-  return null;
+  return 'other';
 }

@@ -32,11 +32,20 @@ class CategoryStat(BaseModel):
     minutes: int
 
 
+class AppStat(BaseModel):
+    """앱별(package) 집계. 사람이 읽는 이름·아이콘은 클라이언트가 로컬에서 해석한다
+    (서버는 package_name만 보관 — 개인정보 최소 원칙)."""
+
+    package_name: str
+    minutes: int
+
+
 class TodayStats(BaseModel):
     date: str                       # YYYY-MM-DD (user tz 기준)
     total_minutes: int
     in_work_minutes: int            # 작업 시간대에 흩어진 시간
     by_category: list[CategoryStat]
+    by_app: list[AppStat]           # 앱별 drill-down (분 내림차순)
 
 
 class DayStat(BaseModel):
@@ -47,6 +56,7 @@ class DayStat(BaseModel):
 class WeekStats(BaseModel):
     total_minutes: int
     by_category: list[CategoryStat]
+    by_app: list[AppStat]           # 앱별 drill-down (분 내림차순)
     by_day: list[DayStat]           # 최근 7일 (오래된→최신)
 
 

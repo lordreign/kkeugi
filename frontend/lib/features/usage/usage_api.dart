@@ -40,12 +40,26 @@ class CategoryStat {
   final int minutes;
 }
 
+/// 앱별(package) 집계. 사람이 읽는 이름·아이콘은 AppMeta로 따로 해석한다.
+class AppStat {
+  const AppStat({required this.packageName, required this.minutes});
+
+  factory AppStat.fromJson(Map<String, dynamic> j) => AppStat(
+        packageName: j['package_name'] as String,
+        minutes: j['minutes'] as int,
+      );
+
+  final String packageName;
+  final int minutes;
+}
+
 class TodayStats {
   const TodayStats({
     required this.date,
     required this.totalMinutes,
     required this.inWorkMinutes,
     required this.byCategory,
+    required this.byApp,
   });
 
   factory TodayStats.fromJson(Map<String, dynamic> j) => TodayStats(
@@ -55,12 +69,16 @@ class TodayStats {
         byCategory: (j['by_category'] as List)
             .map((e) => CategoryStat.fromJson((e as Map).cast<String, dynamic>()))
             .toList(),
+        byApp: ((j['by_app'] as List?) ?? const [])
+            .map((e) => AppStat.fromJson((e as Map).cast<String, dynamic>()))
+            .toList(),
       );
 
   final String date;
   final int totalMinutes;
   final int inWorkMinutes;
   final List<CategoryStat> byCategory;
+  final List<AppStat> byApp;
 }
 
 /// V1 EXECUTION PLAN §2 — paywall 직전 손실 누적 표시 (월초~현재).

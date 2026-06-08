@@ -13,6 +13,7 @@ TodayStats _stats(Map<String, int> byCategory) => TodayStats(
         for (final e in byCategory.entries)
           CategoryStat(category: e.key, minutes: e.value),
       ],
+      byApp: const [],
     );
 
 ThresholdItem _t(String cat, int min, {bool enabled = true}) => ThresholdItem(

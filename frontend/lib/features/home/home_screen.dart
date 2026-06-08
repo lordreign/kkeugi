@@ -6,7 +6,9 @@ import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../thresholds/thresholds_provider.dart';
+import '../usage/category_map.dart';
 import '../usage/usage_api.dart';
+import '../usage/usage_channel.dart';
 import '../usage/usage_providers.dart';
 
 /// 카테고리 한글 라벨.
@@ -17,6 +19,8 @@ const _categoryLabels = {
   'webtoon': '웹툰',
   'other': '기타',
 };
+
+String _categoryLabel(String category) => _categoryLabels[category] ?? category;
 
 /// W4 — UsageStatsManager 자동 import 실데이터 연결.
 class HomeScreen extends ConsumerWidget {
@@ -164,12 +168,106 @@ class _StatsBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           for (final c in data.byCategory)
             _CategoryRow(
-              name: _categoryLabels[c.category] ?? c.category,
+              name: _categoryLabel(c.category),
               minutes: c.minutes,
               ratio: maxMinutes == 0 ? 0 : c.minutes / maxMinutes,
             ),
         ],
+        if (data.byApp.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.xl2),
+          _AppBreakdown(apps: data.byApp),
+        ],
+        const SizedBox(height: AppSpacing.xl),
       ],
+    );
+  }
+}
+
+/// 앱별 drill-down — 카테고리 요약 아래에서 실제 앱을 그대로 보여준다.
+/// 이름·아이콘은 appMetaProvider(로컬 PackageManager)로 해석, 분은 서버 집계.
+class _AppBreakdown extends ConsumerWidget {
+  const _AppBreakdown({required this.apps});
+  final List<AppStat> apps;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meta = ref.watch(appMetaProvider).valueOrNull ?? const {};
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('오늘 · 앱별', style: AppTypography.monoSmall()),
+        const SizedBox(height: AppSpacing.md),
+        for (final a in apps)
+          _AppRow(
+            app: a,
+            meta: meta[a.packageName],
+          ),
+      ],
+    );
+  }
+}
+
+class _AppRow extends StatelessWidget {
+  const _AppRow({required this.app, required this.meta});
+
+  final AppStat app;
+  final AppMeta? meta;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = meta?.displayName ?? app.packageName;
+    final category = _categoryLabel(categoryForPackage(app.packageName));
+    final icon = meta?.icon;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: icon != null
+                ? Image.memory(icon, width: 32, height: 32, gaplessPlayback: true)
+                : Container(
+                    width: 32,
+                    height: 32,
+                    color: AppColors.divider,
+                    alignment: Alignment.center,
+                    child: Text(
+                      name.isNotEmpty ? name.characters.first : '?',
+                      style: AppTypography.bodyMedium
+                          .copyWith(color: AppColors.textSecondary),
+                    ),
+                  ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodyMedium,
+                ),
+                Text(
+                  category,
+                  style: AppTypography.labelSmall
+                      .copyWith(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Text(
+            '${app.minutes}분',
+            style: AppTypography.bodyMedium.copyWith(
+              fontFeatures: const [],
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

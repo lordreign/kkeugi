@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.deps import get_current_user
 from app.usage.models import UsageEvent, UsageEventDedupe
 from app.usage.schemas import (
+    AppStat,
     CategoryStat,
     DayStat,
     MonthLoss,
@@ -92,6 +93,29 @@ def _day_start_utc(now: datetime, tz: ZoneInfo, days_ago: int = 0) -> datetime:
     return local_midnight.astimezone(UTC)
 
 
+# 앱별 drill-down 상한 (홈/회고에서 표시할 top N). 노이즈 방지 + 응답 크기 제한.
+_APP_BREAKDOWN_LIMIT = 30
+
+
+async def _by_app(
+    db: AsyncSession, user: User, start: datetime,
+) -> list[AppStat]:
+    """[start, now) 구간 package_name별 합계 (분 내림차순, 0분 제외, top N)."""
+    rows = (
+        await db.execute(
+            select(UsageEvent.package_name, func.sum(UsageEvent.duration_seconds))
+            .where(UsageEvent.user_id == user.id, UsageEvent.occurred_at >= start)
+            .group_by(UsageEvent.package_name),
+        )
+    ).all()
+    apps = [
+        AppStat(package_name=pkg, minutes=round((secs or 0) / 60)) for pkg, secs in rows
+    ]
+    apps = [a for a in apps if a.minutes > 0]
+    apps.sort(key=lambda a: a.minutes, reverse=True)
+    return apps[:_APP_BREAKDOWN_LIMIT]
+
+
 @router.get("/stats/today", response_model=TodayStats)
 async def stats_today(
     user: User = Depends(get_current_user),
@@ -127,6 +151,7 @@ async def stats_today(
         total_minutes=round(total / 60),
         in_work_minutes=round(in_work / 60),
         by_category=by_category,
+        by_app=await _by_app(db, user, start),
     )
 
 
@@ -175,6 +200,7 @@ async def stats_week(
     return WeekStats(
         total_minutes=round(total / 60),
         by_category=by_category,
+        by_app=await _by_app(db, user, start),
         by_day=by_day,
     )
 

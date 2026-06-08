@@ -47,8 +47,8 @@ Future<UsageSyncResult> runUsageSync({required Dio dio}) async {
   for (final s in sessions) {
     final seconds = s.duration.inSeconds;
     if (seconds < _minSessionSeconds) continue;
+    // 하이브리드: 알려진 앱은 카테고리 분류, 그 외는 'other'로 포착 (null 없음).
     final category = categoryForPackage(s.packageName);
-    if (category == null) continue;
     events.add(
       UsageEventDto(
         clientEventId: uuid.v5(

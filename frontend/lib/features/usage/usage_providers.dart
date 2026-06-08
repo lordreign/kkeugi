@@ -37,6 +37,20 @@ final todayStatsProvider = FutureProvider<TodayStats>((ref) async {
   return UsageApi(dio).today();
 });
 
+/// 오늘 통계의 앱별 패키지 → 이름·아이콘 맵. 표시 직전 네이티브에서 해석.
+/// today stats가 갱신되면 함께 다시 로드된다. 실패해도 빈 맵(이름 fallback).
+final appMetaProvider = FutureProvider<Map<String, AppMeta>>((ref) async {
+  final stats = await ref.watch(todayStatsProvider.future);
+  final packages = stats.byApp.map((a) => a.packageName).toList();
+  if (packages.isEmpty) return const {};
+  try {
+    final metas = await UsageChannel.getAppMeta(packages);
+    return {for (final m in metas) m.packageName: m};
+  } catch (_) {
+    return const {};
+  }
+});
+
 /// 설정 화면 열기 → 사용자가 권한 토글 후 복귀하면 invalidate.
 Future<void> openUsagePermissionSettings(WidgetRef ref) async {
   await UsageChannel.openUsageAccessSettings();
