@@ -89,12 +89,13 @@ def format_message(
         skipped_note = f"\n🔁 같은 에러 {skipped_since}회 cooldown 중"
 
     now_kst = datetime.now(UTC).astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+    # 플레인 텍스트 — trace 안의 <module> 같은 토큰을 HTML 엔티티로 오해 안 받게.
     return (
         f"🚨 끊기 백엔드 에러\n"
         f"📍 {path}\n"
         f"⚠️ {type(exc).__name__}: {str(exc)[:200]}{user_part}\n"
         f"🕒 {now_kst}{skipped_note}\n\n"
-        f"```\n{trace_lines}\n```"
+        f"────────\n{trace_lines}"
     )
 
 
@@ -129,7 +130,9 @@ async def notify_exception(
             user_id=user_id,
             skipped_since=_state.skipped_count.get(fp, 0),
         )
-        await send_message(ops_chat, msg)
+        # parse_mode=None: stack trace 안 <module>, <frozen ...> 등을
+        # HTML 엔티티로 오인 받지 않도록 plain text 발송.
+        await send_message(ops_chat, msg, parse_mode=None)
     except TelegramNotConfiguredError:
         return  # 정상 fallback
     except Exception as e:

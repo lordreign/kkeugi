@@ -13,22 +13,31 @@ class TelegramNotConfiguredError(RuntimeError):
     """TELEGRAM_BOT_TOKEN 미설정."""
 
 
-async def send_message(chat_id: str, text: str) -> bool:
+async def send_message(
+    chat_id: str,
+    text: str,
+    *,
+    parse_mode: str | None = "HTML",
+) -> bool:
     """텔레그램 메시지 발송. 성공 여부 반환.
 
     bot token만 있으면 로컬에서도 즉시 동작 (public URL·Play Console 무관).
+
+    parse_mode
+        - "HTML"  (default): 회고 카드 등 일반 메시지 — <b> 등 HTML 엔티티 가능
+        - None: 에러 stack trace 처럼 임의 텍스트(<module> 등) 그대로 보낼 때
     """
     settings = get_settings()
     if not settings.telegram_bot_token:
         raise TelegramNotConfiguredError("TELEGRAM_BOT_TOKEN not set")
 
     url = f"{_API}/bot{settings.telegram_bot_token}/sendMessage"
+    payload: dict[str, object] = {"chat_id": chat_id, "text": text}
+    if parse_mode is not None:
+        payload["parse_mode"] = parse_mode
     async with httpx.AsyncClient(timeout=10) as client:
         try:
-            resp = await client.post(
-                url,
-                json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
-            )
+            resp = await client.post(url, json=payload)
             if resp.status_code != 200:
                 logger.warning("telegram send failed %s: %s", resp.status_code, resp.text)
                 return False
