@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     )
 
     anthropic_api_key: str | None = Field(None, alias="ANTHROPIC_API_KEY")
-    sentry_dsn: str | None = Field(None, alias="SENTRY_DSN_BACKEND")
+    # 백엔드 에러 알림은 Sentry 대신 Telegram 운영자 chat 사용 (Telegram 섹션 참조).
 
     # Google Play Billing 서버 영수증 검증 (Step 6 실연동). dev는 FakeVerifier.
     google_play_package_name: str = Field(
@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     telegram_bot_username: str = Field("kkeugi_bot", alias="TELEGRAM_BOT_USERNAME")
     # 웹훅 위변조 방지 (Telegram setWebhook secret_token). 미설정 시 dev에서 검증 skip.
     telegram_webhook_secret: str | None = Field(None, alias="TELEGRAM_WEBHOOK_SECRET")
+
+    # 백엔드 unhandled 에러를 발송할 운영자 chat_id (Sentry 대체).
+    # 미설정 시 graceful skip.
+    telegram_ops_chat_id: str | None = Field(None, alias="TELEGRAM_OPS_CHAT_ID")
+    # 같은 fingerprint(path+exc_class+msg) 재발생 시 알림 cooldown(초).
+    error_notifier_cooldown_sec: int = Field(300, alias="ERROR_NOTIFIER_COOLDOWN_SEC")
 
     cors_origins: list[str] = Field(default_factory=lambda: ["*"])
 

@@ -30,7 +30,7 @@
 - **LLM**: Claude Haiku 3.5 (primary) + GPT-5 mini (fallback) — Anthropic SDK from FastAPI
 - **결제**: Toss Payments 앱 SDK (외부 결제, 인앱결제 우회) — 일회 + 구독 빌링키
 - **카톡**: 카카오 비즈메시지 알림톡 정보성 — Aligo / SOLAPI / DirectSend (FastAPI 직접 호출)
-- **모니터링**: Sentry free tier + Mixpanel free
+- **모니터링**: Sentry free tier (Flutter 만) + 백엔드 에러는 Telegram 운영자 알림 + Mixpanel free
 
 ## 8주 빌드 + gstack 매핑
 

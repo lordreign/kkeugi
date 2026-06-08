@@ -53,12 +53,11 @@
 - [ ] API key 발급 → 백엔드 secret으로 저장
 - [ ] ANTHROPIC_API_KEY 환경 변수
 
-### 6. Sentry Free 가입
+### 6. Sentry Free 가입 (프론트만)
 - [ ] [sentry.io](https://sentry.io) 가입
-- [ ] 새 프로젝트 2개 생성:
-  - 백엔드: Python (FastAPI)
-  - 프론트엔드: Flutter (Mobile)
-- [ ] DSN 2개 복사 → secrets 저장 (SENTRY_DSN_BACKEND, SENTRY_DSN_FLUTTER)
+- [ ] **프론트엔드만** 프로젝트 생성: Flutter (Mobile)
+- [ ] DSN 1개 복사 → secrets 저장 (`SENTRY_DSN_FLUTTER`)
+- [ ] 백엔드 에러는 **Telegram 운영자 알림** 사용 (`TELEGRAM_OPS_CHAT_ID` — fingerprint 5분 cooldown). `app/observability/error_notifier.py` 참조
 - [ ] Free tier alert: 5K errors/월 80% 도달 시 알람 (Settings → Alerts)
 
 ### 7. GitHub repo + Actions
@@ -148,7 +147,7 @@ fly secrets set TOSS_SECRET_KEY="..." TOSS_WEBHOOK_SECRET="..."
 | 3. Supabase | | | |
 | 4. Google Cloud OAuth | | | |
 | 5. Anthropic Tier 1 | | | |
-| 6. Sentry | | | |
+| 6. Sentry (프론트만) + 백엔드 = Telegram OPS | | | |
 | 7. GitHub Actions | | | |
 | 8. Mailgun (W4) | | | |
 | 9. Telegram Bot (W5) | | | |

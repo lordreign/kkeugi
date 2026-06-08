@@ -1,9 +1,8 @@
 from contextlib import asynccontextmanager
 
-import sentry_sdk
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from sentry_sdk.integrations.fastapi import FastApiIntegration
+from fastapi.responses import JSONResponse
 
 from app.auth.routes import router as auth_router
 from app.channels.routes import router as fcm_router
@@ -20,13 +19,6 @@ from app.users.routes import router as users_router
 
 settings = get_settings()
 
-if settings.sentry_dsn:
-    sentry_sdk.init(
-        dsn=settings.sentry_dsn,
-        environment=settings.environment,
-        traces_sample_rate=0.05,
-        integrations=[FastApiIntegration()],
-    )
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -73,3 +65,38 @@ if settings.environment in ("development", "test"):
     from app.auth.dev import router as dev_auth_router
 
     app.include_router(dev_auth_router)
+
+
+# Unhandled 5xx 에러를 Telegram 운영자 chat 으로 알림 (Sentry 대체).
+# fingerprint 단위 5분 cooldown 으로 spam 방지. 알림 실패가 응답을 막지 않음.
+@app.exception_handler(Exception)
+async def _unhandled_exception_to_telegram(request: Request, exc: Exception):
+    from app.observability.error_notifier import notify_exception
+
+    user_email = None
+    user_id = None
+    # request.state.user 가 인증 dependency 에서 세팅돼 있으면 활용
+    user = getattr(request.state, "user", None)
+    if user is not None:
+        user_email = getattr(user, "email", None)
+        user_id = str(getattr(user, "id", "")) or None
+
+    await notify_exception(
+        exc,
+        path=f"{request.method} {request.url.path}",
+        user_email=user_email,
+        user_id=user_id,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+    )
+
+
+# dev/test 환경에서만 — 알림 검증용 boom endpoint.
+if settings.environment in ("development", "test"):
+
+    @app.get("/v1/_dev/boom")
+    async def _dev_boom() -> dict:
+        """의도적 ZeroDivisionError 발생 — error_notifier 검증용."""
+        return {"answer": 1 / 0}  # noqa: B018

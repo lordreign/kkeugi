@@ -40,7 +40,7 @@
 │    · Toss Payments REST  (결제 확인 + webhook)                        │
 │    · Kakao OAuth /v2/user/me                                          │
 │                                                                       │
-│  관측: Sentry Python · Mixpanel server events · Fly.io metrics       │
+│  관측: Telegram OPS 에러 알림 · Mixpanel server events · Fly.io metrics │
 └───────────────────────┬─────────────────────────────────────────────┘
                         │ asyncpg + SQLAlchemy 2.0 async
                         ↓

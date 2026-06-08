@@ -84,7 +84,7 @@ W8 ⬜ 출시 (마케팅·data safety) + 본인 store listing·launch
 - [ ] Supabase 프로젝트(Seoul) → prod `DATABASE_URL`
 - [ ] Google Cloud OAuth Client(Android + Web) → `GOOGLE_CLIENT_ID`
 - [ ] Anthropic API key + Tier 1 prepay → `ANTHROPIC_API_KEY`
-- [ ] Sentry DSN(백엔드/프론트), **Mixpanel 프로젝트 토큰**(KPI 실 수집)
+- [ ] Sentry DSN(프론트만 — 백엔드는 **Telegram 운영자 알림**으로 대체), **Mixpanel 프로젝트 토큰**(KPI 실 수집)
 - [ ] 이 단계에서 **A-2 `frontend.yml` CI 함께 도입**
 
 ### B-7. 실기기 통합 검증 (W5 Step 6)
@@ -124,8 +124,8 @@ fly secrets set \
   JWT_SECRET="$(openssl rand -hex 32)" \
   GOOGLE_CLIENT_ID="...apps.googleusercontent.com" \
   ANTHROPIC_API_KEY="sk-ant-..." \
-  SENTRY_DSN_BACKEND="https://...@sentry.io/..." \
   TELEGRAM_BOT_TOKEN="..." \
+  TELEGRAM_OPS_CHAT_ID="..." \
   TELEGRAM_WEBHOOK_SECRET="$(openssl rand -hex 16)" \
   MAILGUN_API_KEY="..." MAILGUN_DOMAIN="mail.kkeugi.kr" \
   GOOGLE_PLAY_PACKAGE_NAME="kr.pjshi.kkeugi" \

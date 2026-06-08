@@ -421,7 +421,7 @@ M12 누적         20,000명        ₩730-1,450만     —              avg 7x
 | **이메일 (V1 선택 채널)** | Mailgun free tier (5K emails/월 무료) 또는 AWS SES ($0.10/1K) — FastAPI에서 transactional email 발송 | 중 |
 | **Telegram (V1 선택 채널)** | Telegram Bot API (무료, 사업자 X). python-telegram-bot SDK. 사용자가 본인 Bot과 chat 시작 → chat_id 저장 → 메시지 발송 | 중 |
 | **로컬 알람 (V1 threshold)** | flutter_local_notifications — 사업자 X로 device 내부 알람 발송 가능 | 중 |
-| **모니터링** | Sentry free tier (Python + Flutter) + Fly.io built-in metrics + Supabase Dashboard | 중 |
+| **모니터링** | Sentry free tier (Flutter 만) + 백엔드 unhandled 에러 → Telegram 운영자 알림 (`TELEGRAM_OPS_CHAT_ID`, fingerprint 5분 cooldown) + Fly.io built-in metrics + Supabase Dashboard | 중 |
 | **iOS (v2 단계)** | Flutter 동일 코드베이스 + Swift Family Controls Native Companion | **하** (Phase 1 매출 후 외주 또는 학습) |
 
 ### 외주 항목

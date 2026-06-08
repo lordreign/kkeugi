@@ -154,14 +154,14 @@ PHASE 7  출시 후           모니터링 + 사업자 등록 결정(매출 trig
 
 ---
 
-### 2-D. 인프라 — Fly.io + Supabase + Anthropic + Sentry + Mixpanel
+### 2-D. 인프라 — Fly.io + Supabase + Anthropic + Sentry(프론트만) + Mixpanel
 
 **무엇을 할 일**
 
 1. **Fly.io** https://fly.io 가입 + 카드. region = **Seoul(`nrt`)** 또는 `hkg`. CLI 설치 후 `flyctl auth login`. **API 토큰 발급 → GitHub Actions secret `FLY_API_TOKEN`**
 2. **Supabase** https://supabase.com 가입 + 새 프로젝트 (region = Seoul). DB password 설정 → Settings → Database → **Connection string(transaction pooler, asyncpg 호환)** 복사 → secret `DATABASE_URL`
 3. **Anthropic** https://console.anthropic.com 가입 + Tier 1 prepay → API key 발급 → secret `ANTHROPIC_API_KEY`
-4. **Sentry** https://sentry.io 가입(free) → 프로젝트 2개(백엔드 Python / 프론트 Flutter) → DSN 각각 메모
+4. **Sentry** https://sentry.io 가입(free) → 프로젝트 **1개 (프론트 Flutter 만)** → DSN 메모. 백엔드 에러는 Telegram 운영자 chat (`TELEGRAM_OPS_CHAT_ID`) 으로 직접 알림
 5. **Mixpanel** https://mixpanel.com 가입(free) → 프로젝트 생성 → **Project Token** 메모
 
 **완료 기준**: 5개 서비스 모두 토큰/키 메모
@@ -179,8 +179,8 @@ PHASE 7  출시 후           모니터링 + 사업자 등록 결정(매출 trig
    - `JWT_SECRET` = `openssl rand -hex 32` 결과
    - `GOOGLE_CLIENT_ID` = Web Client ID (2-B)
    - `ANTHROPIC_API_KEY` (2-D)
-   - `SENTRY_DSN_BACKEND` (2-D)
    - `TELEGRAM_BOT_TOKEN` (2-C)
+   - `TELEGRAM_OPS_CHAT_ID` (본인 chat — 백엔드 에러 알림)
    - `TELEGRAM_WEBHOOK_SECRET` = `openssl rand -hex 16`
    - `MAILGUN_API_KEY`, `MAILGUN_DOMAIN=mail.kkeugi.kr` (2-C)
    - `GOOGLE_PLAY_PACKAGE_NAME=kr.pjshi.kkeugi`
@@ -298,7 +298,8 @@ PHASE 7  출시 후           모니터링 + 사업자 등록 결정(매출 trig
    > 4. 회고 카드 받으면 알려줘 (텔레그램/이메일 채널 선택 가능)
    > 5. 이상하면 그냥 카톡으로 알려주면 됨
 5. **1주 동안 모니터링**
-   - Sentry 대시보드: 에러 발생 여부
+   - Telegram 운영자 chat: 백엔드 에러 즉시 알림 (`TELEGRAM_OPS_CHAT_ID`)
+   - Sentry 대시보드: 프론트(Flutter) 크래시 발생 여부
    - Mixpanel: 권한 동의·세션·결제 이벤트 흐름
    - 본인이 Play Console 의 내부 앱 공유 통계로 설치 여부 확인
    - 지인 피드백 카톡 받기
@@ -316,7 +317,7 @@ PHASE 7  출시 후           모니터링 + 사업자 등록 결정(매출 trig
 3. 큰 변경 있으면 지인에게 "업데이트 됐어, 한 번만 더 열어봐줘"
 4. **이슈 다 잡혔다 판단 → PHASE 4 진입**
 
-**완료 기준**: Sentry 에러 0건 7일 + 핵심 흐름(로그인·권한·결제·회고·공유) 모두 안정
+**완료 기준**: Telegram 운영자 알림 0건 7일 + 프론트 Sentry 크래시 0건 7일 + 핵심 흐름(로그인·권한·결제·회고·공유) 모두 안정
 
 ---
 

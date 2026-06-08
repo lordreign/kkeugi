@@ -86,7 +86,13 @@ class AnthropicLLM:
 
 
 def get_llm():
+    """test 는 항상 Fake(결정론). 그 외 키 있으면 Anthropic, 없으면 Fake.
+
+    development 에서도 키가 있으면 Anthropic 으로 실 검증 가능.
+    """
     settings = get_settings()
-    if settings.environment in ("development", "test") or not settings.anthropic_api_key:
+    if settings.environment == "test":
+        return FakeLLM()
+    if not settings.anthropic_api_key:
         return FakeLLM()
     return AnthropicLLM()
